@@ -1,0 +1,70 @@
+services:
+  # --- MYSQL DATABASE ---
+  mysql-prod:
+    image: mysql:8.0
+    container_name: blackjack-mysql-prod
+    environment:
+      MYSQL_ROOT_PASSWORD: ${PROD_MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${PROD_MYSQL_DATABASE}
+    ports:
+      - "${PROD_MYSQL_PORT}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - blackjack-network
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$${PROD_MYSQL_ROOT_PASSWORD}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # --- MONGO DATABASE ---
+  mongo-prod:
+    image: mongo:latest
+    container_name: blackjack-mongo-prod
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_PROD_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PROD_PASS}
+    ports:
+      - "${PROD_MONGO_PORT}:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - blackjack-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # --- JAVA SPRING BOOT APP ---
+  app-java:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: java-app
+    restart: always
+    ports:
+      - "${APP_PORT}:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod,mongodb
+      # Configuración de conexión interna usando los nombres de los servicios Docker
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-prod:3306/${PROD_MYSQL_DATABASE}
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${PROD_MYSQL_ROOT_PASSWORD}
+      SPRING_DATA_MONGODB_URI: mongodb://${MONGO_PROD_USER}:${MONGO_PROD_PASS}@mongo-prod:27017/${MONGO_PROD_DB}?authSource=admin
+    networks:
+      - blackjack-network
+    depends_on:
+      mysql-prod:
+        condition: service_healthy
+      mongo-prod:
+        condition: service_healthy
+
+volumes:
+  mysql-data:
+  mongo-data:
+
+networks:
+  blackjack-network:
+    driver: bridge
