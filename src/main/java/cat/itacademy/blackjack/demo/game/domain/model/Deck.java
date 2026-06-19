@@ -39,6 +39,10 @@ public class Deck {
         return new Deck(cards);
     }
 
+    public boolean hasNoCards(){
+       return this.cards.isEmpty();
+    }
+
     public Card draw() {
         Card card = cards.getFirst();
         cards.removeFirst();

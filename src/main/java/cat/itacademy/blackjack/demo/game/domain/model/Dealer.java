@@ -11,7 +11,7 @@ public class Dealer extends Player{
         );
     }
 
-    public boolean stand (){
-        return this.getHand().getTotalValue() >= 17;
+    public boolean shouldStand(){
+        return this.getHand().getTotalValue() >= 17 || this.checkBlackjack();
     }
 }

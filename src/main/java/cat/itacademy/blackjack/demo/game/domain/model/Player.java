@@ -26,14 +26,7 @@ public abstract class Player {
     }
 
     boolean checkBlackjack(){
-        if (this.hand.getCards().size() != 2){
-            return false;
-        }
-        List<Card> firstTwoCards = this.hand.getCards().subList(0, 2);
-        boolean hasAce = firstTwoCards.stream().anyMatch(c -> c.cardNumber().equals(CardNumber.ACE));
-        boolean hasJack = firstTwoCards.stream().anyMatch(c -> c.cardNumber().equals(CardNumber.JACK)
-                || c.cardNumber().equals(CardNumber.KING) || c.cardNumber().equals(CardNumber.QUEEN));
-        return hasAce && hasJack;
+        return this.hand.isBlackjack();
     }
 
     public Hand getHand() {

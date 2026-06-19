@@ -9,10 +9,11 @@ import cat.itacademy.blackjack.demo.game.domain.exception.InvalidHitException;
 import cat.itacademy.blackjack.demo.game.domain.value_object.Card;
 import cat.itacademy.blackjack.demo.common.domain.value_object.GameId;
 import cat.itacademy.blackjack.demo.game.domain.value_object.GameOutcome;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 
-//annotations getter
+@Getter
 public class Game {
     private GameId id;
     private GameState gameState;
@@ -20,7 +21,7 @@ public class Game {
     private Dealer dealer;
     private Deck deck;
     private LocalDateTime createdAt;
-    private LocalDateTime lastTimePlayedAt; // passarho per repo o JPA
+    private LocalDateTime lastTimePlayedAt; // TODO remove attribute and pass the info through the repo, a mapper or JPA
     private GameOutcome gameOutcome;
 
     public Game(GameId id, GameState gameState, UserPlayer userPlayer, Dealer dealer, Deck deck, LocalDateTime createdAt, LocalDateTime lastTimePlayedAt, GameOutcome gameOutcome) {
@@ -46,7 +47,7 @@ public class Game {
             throw new InvalidGameException("createdAt cannot be null");
         }
 
-        // treure
+        // TODO remove unnecessary attributes
         this.id = id;
         this.gameState = gameState;
         this.userPlayer = userPlayer;
@@ -60,7 +61,7 @@ public class Game {
     public static Game create(UserPlayer userPlayer, Dealer dealer, Deck deck) {
        return new Game(
                GameId.generate(),
-               GameState.STARTED, // settejar
+               GameState.STARTED, // TODO set the value after the call to the constructor
                userPlayer,
                dealer,
                deck,
@@ -68,9 +69,9 @@ public class Game {
                LocalDateTime.now(),
                null
        );
-       //settejar createdAt lastTimePlayed o createdAt al JPA
+       // TODO settejar createdAt lastTimePlayed o createdAt al JPA
     }
-    // named constructor
+    // TODO reconstitute named constructor
     public void start (ShuffleStrategy shuffleStrategy){
         if (gameState != GameState.STARTED){
             throw new GameException("the Game cannot start over because it has already started");
@@ -86,7 +87,7 @@ public class Game {
         }
 
     public void dealerTurn(){
-        while (!this.dealer.stand()){
+        while (!this.dealer.shouldStand()){
             dealerHits();
         }
     }
@@ -101,7 +102,7 @@ public class Game {
         ensureGameIsActive();
         Card card = drawDeck();
         this.userPlayer.hit(card);
-        this.lastTimePlayedAt = LocalDateTime.now();
+        this.lastTimePlayedAt = LocalDateTime.now(); // TODO review
     }
 
     private void ensureGameIsActive(){
@@ -111,10 +112,9 @@ public class Game {
     }
 
     private Card drawDeck(){
-        if (this.deck.getCards().isEmpty()){
+        if (this.deck.hasNoCards()){
             setFinalGameResult(determineWinner(), false);
         }
-        // metode per checkear si es empty
         return this.deck.draw();
     }
 
@@ -151,37 +151,5 @@ public class Game {
             return GameResult.DEALER_WIN;
         }
         return GameResult.TIE;
-    }
-
-    public GameId getId() {
-        return id;
-    }
-
-    public GameState getGameState() {
-        return gameState;
-    }
-
-    public UserPlayer getUserPlayer() {
-        return userPlayer;
-    }
-
-    public Dealer getDealer() {
-        return dealer;
-    }
-
-    public Deck getDeck() {
-        return deck;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getLastTimePlayedAt() {
-        return lastTimePlayedAt;
-    }
-
-    public GameOutcome getGameOutcome() {
-        return gameOutcome;
     }
 }

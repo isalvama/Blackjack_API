@@ -1,13 +1,16 @@
 package cat.itacademy.blackjack.demo.game.domain.model;
+import cat.itacademy.blackjack.demo.game.domain.CardNumber;
 import cat.itacademy.blackjack.demo.game.domain.exception.InvalidGameException;
 import cat.itacademy.blackjack.demo.game.domain.exception.InvalidPlayerException;
 import cat.itacademy.blackjack.demo.game.domain.value_object.Card;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Hand {
     private List<Card> cards;
+    @Getter
     private Integer totalValue;
 
     public Hand(List<Card> cards, Integer totalValue){
@@ -28,7 +31,7 @@ public class Hand {
         );
     }
 
-    public void addCard (Card card){
+     void addCard (Card card){
         if (card == null){
             throw new InvalidGameException("card to hit cannot be null");
         }
@@ -40,11 +43,18 @@ public class Hand {
         }
     }
 
-    public List<Card> getCards() {
-        return List.copyOf(cards);
+    boolean isBlackjack(){
+        if (this.getCards().size() != 2){
+            return false;
+        }
+        List<Card> firstTwoCards = this.getCards().subList(0, 2);
+        boolean hasAce = firstTwoCards.stream().anyMatch(c -> c.cardNumber().equals(CardNumber.ACE));
+        boolean hasJack = firstTwoCards.stream().anyMatch(c -> c.cardNumber().equals(CardNumber.JACK)
+                || c.cardNumber().equals(CardNumber.KING) || c.cardNumber().equals(CardNumber.QUEEN));
+        return hasAce && hasJack;
     }
 
-    public Integer getTotalValue() {
-        return totalValue;
+    public List<Card> getCards() {
+        return List.copyOf(cards);
     }
 }
