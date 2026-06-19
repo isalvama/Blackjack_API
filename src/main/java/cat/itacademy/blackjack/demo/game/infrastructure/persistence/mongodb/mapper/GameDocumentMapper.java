@@ -13,26 +13,23 @@ public class GameDocumentMapper {
     }
 
     public static Game toModelEntity(GameDocument doc) {
-        return new Game(
+        return Game.reconstitute(
                 GameId.fromString(doc.getId()),
-                GameState.valueOf(doc.getGameState()),
+                GameState.fromString(doc.getGameState()),
                 UserPlayerDocumentMapper.toModelEntity(doc.getUserPlayerInfo(), doc.getUserName()),
                 DealerDocumentMapper.toModelEntity(doc.getDealerInfo()),
-               Deck.from(doc.getDeck()
+                Deck.from(doc.getDeck()
                         .stream()
                         .map(CardDocumentMapper::toModelEntity)
                         .toList()),
                 doc.getCreatedAt(),
-                doc.getLastTimePlayedAt(),
-                null
+                doc.getLastTimePlayedAt()
         );
     }
 
 public static GameDocument toDocument(Game entity) {
         return new GameDocument(
                 entity.getId().toString(),
-                entity.getCreatedAt(),
-                entity.getLastTimePlayedAt(),
                 entity.getUserPlayer().getName().value(),
                 PlayerDocumentMapper.toDocument(entity.getUserPlayer()),
                 PlayerDocumentMapper.toDocument(entity.getDealer()),

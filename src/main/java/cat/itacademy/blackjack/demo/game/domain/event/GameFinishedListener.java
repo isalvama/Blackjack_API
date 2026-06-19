@@ -1,4 +1,4 @@
-package cat.itacademy.blackjack.demo.game.infrastructure.event;
+package cat.itacademy.blackjack.demo.game.domain.event;
 
 import cat.itacademy.blackjack.demo.game_statistics.application.command.ProcessGameStatisticsCommand;
 import cat.itacademy.blackjack.demo.game_statistics.application.port.in.ProcessGameStatisticsUseCase;

@@ -30,23 +30,18 @@ public class ProcessGameStatisticsService implements ProcessGameStatisticsUseCas
                     return PlayerProfile.create(playerName);
                 });
 
-        playerProfile.updateProfileWithNewGame();
+        playerProfile.updateProfileWithNewGame(GameResult.USER_WIN, command.totalCardsValueUser().longValue(), command.finishedWithBlackjack());
         playerProfilePort.save(playerProfile);
 
-        GameId id = GameId.fromUUID(command.gameId());
-        HandState userPlayerHandState = HandState.create(command.numberOfRequestedCardsByUser(), command.numberOfRequestedCardsByUser());
+        HandState userPlayerHandState = HandState.create(command.playerName(), command.playerName());
         HandState dealerPlayerHandState = HandState.create(command.numberOfRequestedCardsByDealer(), command.numberOfRequestedCardsByDealer());
-        Integer gameNumber = finishedGamePort.countGames();
         FinishedGame finishedGame = FinishedGame.create(
-                id,
-                gameNumber,
+                GameId.fromUUID(command.gameId()),
                 userPlayerHandState,
                 dealerPlayerHandState,
                 GameResult.from(command.gameResult()),
                 command.finishedWithBlackjack(),
-                command.createdAt(),
-                command.finishedAt());
-
+                command.createdAt());
         finishedGamePort.save(finishedGame);
     }
 }

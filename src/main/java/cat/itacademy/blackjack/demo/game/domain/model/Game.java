@@ -20,58 +20,50 @@ public class Game {
     private UserPlayer userPlayer;
     private Dealer dealer;
     private Deck deck;
-    private LocalDateTime createdAt;
-    private LocalDateTime lastTimePlayedAt; // TODO remove attribute and pass the info through the repo, a mapper or JPA
     private GameOutcome gameOutcome;
+    private LocalDateTime createdAt;
+    private LocalDateTime lastTimePlayedAt;
 
-    public Game(GameId id, GameState gameState, UserPlayer userPlayer, Dealer dealer, Deck deck, LocalDateTime createdAt, LocalDateTime lastTimePlayedAt, GameOutcome gameOutcome) {
-        if (id == null){
-            throw new InvalidGameException("id cannot be null");
-        }
-        if (gameState == null){
-            throw new InvalidGameException("game state cannot be null");
-        }
-        if (userPlayer == null){
-            throw new InvalidGameException("user player cannot be null");
-        }
-        if (dealer == null){
-            throw new InvalidGameException("dealer cannot be null");
-        }
-        if (deck == null){
-            throw new InvalidGameException("deck cannot be null");
-        }
+    private Game(GameId id, UserPlayer userPlayer, Dealer dealer, Deck deck) {
+
         if (deck.getCards().isEmpty()){
             throw new InvalidGameException("deck's list of cards cannot be empty");
         }
-        if (createdAt == null){
-            throw new InvalidGameException("createdAt cannot be null");
-        }
-
-        // TODO remove unnecessary attributes
-        this.id = id;
-        this.gameState = gameState;
-        this.userPlayer = userPlayer;
-        this.dealer = dealer;
-        this.deck = deck;
-        this.createdAt = createdAt;
-        this.lastTimePlayedAt = lastTimePlayedAt;
-        this.gameOutcome = gameOutcome;
+        this.id = validateNotNull(id, "id cannot be null");
+        this.userPlayer = validateNotNull(userPlayer, "userPlayer cannot be null");
+        this.dealer = validateNotNull(dealer, "dealer cannot be null");
+        this.deck = validateNotNull(deck, "deck cannot be null");
     }
 
     public static Game create(UserPlayer userPlayer, Dealer dealer, Deck deck) {
-       return new Game(
+       Game game = new Game(
                GameId.generate(),
-               GameState.STARTED, // TODO set the value after the call to the constructor
                userPlayer,
                dealer,
-               deck,
-               LocalDateTime.now(),
-               LocalDateTime.now(),
-               null
+               deck
        );
-       // TODO settejar createdAt lastTimePlayed o createdAt al JPA
+       game.gameState = GameState.STARTED;
+       return game;
     }
-    // TODO reconstitute named constructor
+
+    public static Game reconstitute(GameId id, GameState gameState, UserPlayer userPlayer, Dealer dealer, Deck deck, LocalDateTime createdAt, LocalDateTime lastTimePlayedAt) {
+         Game game = new Game(
+                id,
+                userPlayer,
+                dealer,
+                deck
+        );
+         game.gameState = validateNotNull(gameState, "gameState cannot be null");
+         game.createdAt = validateNotNull(createdAt, "createdAt cannot be null");
+         game.lastTimePlayedAt = validateNotNull(lastTimePlayedAt, "lastTimePlayedAt cannot be null");
+        return game;
+    }
+
+    public void updateAuditInfo(LocalDateTime createdAt, LocalDateTime lastTimePlayedAt){
+        this.createdAt = validateNotNull(createdAt, "createdAt cannot be null");
+        this.lastTimePlayedAt = validateNotNull(lastTimePlayedAt, "lastTimePlayedAt cannot be null");
+    }
+
     public void start (ShuffleStrategy shuffleStrategy){
         if (gameState != GameState.STARTED){
             throw new GameException("the Game cannot start over because it has already started");
@@ -102,7 +94,6 @@ public class Game {
         ensureGameIsActive();
         Card card = drawDeck();
         this.userPlayer.hit(card);
-        this.lastTimePlayedAt = LocalDateTime.now(); // TODO review
     }
 
     private void ensureGameIsActive(){
@@ -122,8 +113,7 @@ public class Game {
         this.gameState = GameState.OVER;
         this.gameOutcome = new GameOutcome(
                 gameResult,
-                finishedWithBlackJack,
-                LocalDateTime.now()
+                finishedWithBlackJack
         );
     }
 
@@ -151,5 +141,12 @@ public class Game {
             return GameResult.DEALER_WIN;
         }
         return GameResult.TIE;
+    }
+
+
+    private static <T> T validateNotNull(T obj, String message) {
+        if (obj == null)
+            throw new InvalidGameException(message);
+        return obj;
     }
 }

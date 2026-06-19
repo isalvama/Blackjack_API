@@ -1,85 +1,75 @@
 package cat.itacademy.blackjack.demo.game_statistics.domain.model;
 
+import cat.itacademy.blackjack.demo.common.domain.GameResult;
 import cat.itacademy.blackjack.demo.game_statistics.domain.exception.InvalidPlayerProfileException;
 import cat.itacademy.blackjack.demo.common.domain.value_object.Name;
+import lombok.Getter;
 
+@Getter
 public class PlayerProfile {
     private Long id;
     private Name name;
-    private Integer numberOfGamesWon;
-    private Integer numberOfGamesPlayed;
+    private Long numberOfGamesPlayed;
+    private Long numberOfGamesWon;
     private Long score;
-//    private List<FinishedGame> playedGames;
 
-    public PlayerProfile(Long id, Name name, Integer numberOfGamesWon, Integer numberOfGamesPlayed, Long score) {
-        if (name == null){
-            throw new InvalidPlayerProfileException("name cannot be null");
-        }
-        if (numberOfGamesWon == null){
-            throw new InvalidPlayerProfileException("numberOfGamesWon cannot be null");
-        }
-        if (numberOfGamesWon < 0){
-            throw new InvalidPlayerProfileException("numberOfGamesWon cannot be negative");
-        }
-        if (numberOfGamesPlayed == null){
-            throw new InvalidPlayerProfileException("numberOfGamesPlayed cannot be null");
-        }
-        if (numberOfGamesPlayed < 0){
-            throw new InvalidPlayerProfileException("numberOfGamesPlayed cannot be negative");
-        }
-        if (score == null){
-            throw new InvalidPlayerProfileException("score cannot be null");
-        }
-        if (score < 0L){
-            throw new InvalidPlayerProfileException("score cannot be negative");
-        }
-//        if (playedGames == null){
-//            throw new InvalidPlayerProfileException("playedGames list cannot be null");
-//        }
-        this.id = id;
-        this.name = name;
-        this.numberOfGamesWon = numberOfGamesWon;
-        this.numberOfGamesPlayed = numberOfGamesPlayed;
-        this.score = score;
-//        this.playedGames = playedGames;
+    private PlayerProfile(Name name, Long numberOfGamesPlayed, Long numberOfGamesWon, Long score) {
+
+        this.name = validateNotNull(name, "name cannot be null");
+        this.numberOfGamesPlayed = validateNonNullPositiveLong(numberOfGamesPlayed, "numberOfGamesPlayed");
+        this.numberOfGamesWon = validateNonNullPositiveLong(numberOfGamesWon, "numberOfGamesWon");
+        this.score = validateNonNullPositiveLong(score, "score");
     }
 
     public static PlayerProfile create (Name name){
         return new PlayerProfile(
-                null,
                 name,
-                0,
-                0,
+                0L,
+                0L,
                 0L
-//                new ArrayList<>()
         );
     }
-    public void updateProfileWithNewGame(){
+
+    public static PlayerProfile reconstitute (Long id, Name name,Long numberOfGamesPlayed, Long numberOfGamesWon, Long score){
+        PlayerProfile playerProfile = new PlayerProfile(
+                name,
+                numberOfGamesWon,
+                numberOfGamesPlayed,
+                score
+        );
+        playerProfile.id = validateNonNullPositiveLong(id, "id");
+        return playerProfile;
+    }
+
+    public void updateProfileWithNewGame(GameResult gameResult, Long totalCardsValue, Boolean finishedWithBlackJack){
         this.numberOfGamesWon++;
         this.numberOfGamesPlayed++;
+
+        if (gameResult.equals(GameResult.USER_WIN) && finishedWithBlackJack){
+            this.score += 21;
+        }
+        if (gameResult.equals(GameResult.USER_WIN) && !finishedWithBlackJack){
+            this.score += totalCardsValue;
+        }
+        if (gameResult.equals(GameResult.TIE) && finishedWithBlackJack){
+            this.score += 11;
+        }
+        if (gameResult.equals(GameResult.TIE) && !finishedWithBlackJack){
+            this.score += totalCardsValue/2;
+        }
     }
 
-    public Name getName() {
-        return name;
+    private static <T> T validateNotNull(T obj, String message) {
+        if (obj == null)
+            throw new InvalidPlayerProfileException(message);
+        return obj;
     }
 
-    public Long getId() {
-        return id;
+    private static Long validateNonNullPositiveLong(Long longValue, String fieldName) {
+        validateNotNull(longValue, String.format("%s cannot be null", fieldName));
+        if (longValue < 0L){
+            throw new InvalidPlayerProfileException(String.format("%s cannot be negative", fieldName));
+        }
+        return longValue;
     }
-
-    public Integer getNumberOfGamesWon() {
-        return numberOfGamesWon;
-    }
-
-    public Integer getNumberOfGamesPlayed() {
-        return numberOfGamesPlayed;
-    }
-
-    public Long getScore() {
-        return score;
-    }
-
-//    public List<FinishedGame> getPlayedGames() {
-//        return List.copyOf(playedGames);
-//    }
 }

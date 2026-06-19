@@ -8,6 +8,8 @@ import cat.itacademy.blackjack.demo.game.infrastructure.persistence.mongodb.mapp
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+
 @Profile("mongodb")
 @Repository
 public class MongoGameRepository implements ActiveGamePort {
@@ -19,7 +21,12 @@ public class MongoGameRepository implements ActiveGamePort {
 
     @Override
     public Game saveGame(Game game) {
-        GameDocument created = mongoGameSpringDataRepository.insert(GameDocumentMapper.toDocument(game));
-        return GameDocumentMapper.toModelEntity(created);
+        GameDocument gameDocument = GameDocumentMapper.toDocument(game);
+        if (gameDocument.getCreatedAt() == null){
+            gameDocument.setCreatedAt(LocalDateTime.now());
+        }
+        gameDocument.setLastTimePlayedAt(LocalDateTime.now());
+        GameDocument docCreated = mongoGameSpringDataRepository.insert(gameDocument);
+       return GameDocumentMapper.toModelEntity(docCreated);
     }
 }

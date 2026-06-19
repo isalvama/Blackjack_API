@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -19,6 +20,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class JpaFinishedGameEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,21 +29,18 @@ public class JpaFinishedGameEntity {
     @JdbcTypeCode(SqlTypes.BINARY)
     private UUID gameId;
 
-    @Column(name = "game_number", updatable = false)
-    private Integer gameNumber;
-
     @ManyToOne
     @JoinColumn(name = "player_id", updatable = false)
-    private JpaPlayerProfileEntity userPlayer;
+    private JpaPlayerProfileEntity player;
 
     @Column(name = "number_requested_cards_user_player", updatable = false)
-    private Integer numberOfRequestedCardsByUserPlayer;
+    private Integer playerNumberOfCards;
 
     @Column(name = "number_requested_cards_dealer", updatable = false)
-    private Integer numberOfRequestedCardsByDealer;
+    private Integer dealerNumberOfCards;
 
     @Column(name = "total_cards_value_user_player", updatable = false)
-    private Integer totalCardsValueUserPlayer;
+    private Integer totalCardsValuePlayer;
 
     @Column(name = "total_cards_value_dealer", updatable = false)
     private Integer totalCardsValueDealer;
@@ -56,6 +55,13 @@ public class JpaFinishedGameEntity {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", updatable = false)
+    @CreatedDate
+    @Column(name = "finished_at", updatable = false)
     private LocalDateTime finishedAt;
+
+
+    @PrePersist
+    protected void onUpdate() {
+        this.finishedAt = LocalDateTime.now();
+    }
 }

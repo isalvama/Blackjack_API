@@ -13,7 +13,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -34,7 +33,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = BlackjackApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("mongodb")
 @Testcontainers
-@EnableMongoRepositories(basePackages = "cat.itacademy.blackjack.demo.game.infrastructure.persistence.mongodb.springdatarepository")
 @EnableJpaRepositories(basePackages = "cat.itacademy.blackjack.demo.game_statistics.infrastructure.jpa.springDataRepository")
 @AutoConfigureMockMvc
 public class BlackjackIntegrationTest {
@@ -87,8 +85,7 @@ public class BlackjackIntegrationTest {
                         .andExpect(jsonPath("$.hand", hasSize(2)))
                         .andExpect(jsonPath("$.gameState").value("STARTED"))
                         .andExpect(jsonPath("$.gameResult", anyOf(is(nullValue()))))
-                        .andExpect(jsonPath("$.finishedWithBlackjack", anyOf(is(nullValue()))))
-                        .andExpect(jsonPath("$.finishedAt", anyOf(is(nullValue()))));
+                        .andExpect(jsonPath("$.finishedWithBlackjack", anyOf(is(nullValue()))));
 
                 String resultAsString = result.andReturn().getResponse().getContentAsString();
                 String createdAtFromEscapedJson = com.jayway.jsonpath.JsonPath.read(resultAsString, "$.createdAt");
@@ -130,8 +127,7 @@ public class BlackjackIntegrationTest {
                         .andExpect(jsonPath("$.hand", hasSize(2)))
                         .andExpect(jsonPath("$.gameState").value("OVER"))
                         .andExpect(jsonPath("$.gameResult").value(GameResult.USER_WIN.name()))
-                        .andExpect(jsonPath("$.finishedWithBlackjack").value("true"))
-                        .andExpect(jsonPath("$.finishedAt").exists());
+                        .andExpect(jsonPath("$.finishedWithBlackjack").value("true"));
 
                 String resultAsString = result.andReturn().getResponse().getContentAsString();
                 String createdAtFromEscapedJson = com.jayway.jsonpath.JsonPath.read(resultAsString, "$.createdAt");
@@ -142,11 +138,6 @@ public class BlackjackIntegrationTest {
                 LocalDateTime lastTimePlayedAt = LocalDateTime.parse(lastTimePlayedAtFromEscapedJson);
                 assertThat(lastTimePlayedAt).isAfter(LocalDateTime.now().minusMinutes(1));
 
-                String finishedAtFromEscapedJson = com.jayway.jsonpath.JsonPath.read(resultAsString, "$.finishedAt");
-                LocalDateTime finishedAt = LocalDateTime.parse(finishedAtFromEscapedJson);
-                assertThat(finishedAt).isAfter(LocalDateTime.now().minusMinutes(1));
-
-                assertThat(finishedAt).isAfter(lastTimePlayedAt);
                 assertThat(lastTimePlayedAt).isAfter(createdAt);
             }
         }
@@ -178,9 +169,7 @@ public class BlackjackIntegrationTest {
                         .andExpect(jsonPath("$.hand", hasSize(2)))
                         .andExpect(jsonPath("$.gameState").value("OVER"))
                         .andExpect(jsonPath("$.gameResult").value(GameResult.TIE.name()))
-                        .andExpect(jsonPath("$.finishedWithBlackjack").value("true"))
-                        .andExpect(jsonPath("$.finishedAt").exists());
-
+                        .andExpect(jsonPath("$.finishedWithBlackjack").value("true"));
                 String resultAsString = result.andReturn().getResponse().getContentAsString();
                 String createdAtFromEscapedJson = com.jayway.jsonpath.JsonPath.read(resultAsString, "$.createdAt");
                 LocalDateTime createdAt = LocalDateTime.parse(createdAtFromEscapedJson);
@@ -190,11 +179,6 @@ public class BlackjackIntegrationTest {
                 LocalDateTime lastTimePlayedAt = LocalDateTime.parse(lastTimePlayedAtFromEscapedJson);
                 assertThat(lastTimePlayedAt).isAfter(LocalDateTime.now().minusMinutes(1));
 
-                String finishedAtFromEscapedJson = com.jayway.jsonpath.JsonPath.read(resultAsString, "$.finishedAt");
-                LocalDateTime finishedAt = LocalDateTime.parse(finishedAtFromEscapedJson);
-                assertThat(finishedAt).isAfter(LocalDateTime.now().minusMinutes(1));
-
-                assertThat(finishedAt).isAfter(lastTimePlayedAt);
                 assertThat(lastTimePlayedAt).isAfter(createdAt);
             }
         }

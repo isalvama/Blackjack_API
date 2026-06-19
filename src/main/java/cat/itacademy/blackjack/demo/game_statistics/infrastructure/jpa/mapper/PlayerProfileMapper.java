@@ -9,24 +9,23 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class PlayerProfileMapper {
-    private final FinishedGameMapper finishedGameMapper;
 
     public JpaPlayerProfileEntity toEntity(PlayerProfile playerProfile){
 
-        return JpaPlayerProfileEntity.builder()
-                .id((playerProfile.getId() != null) ? null : playerProfile.getId())
-                .name(playerProfile.getName().value())
-                .numberOfGamesWon(playerProfile.getNumberOfGamesWon())
-                .totalGamesPlayed(playerProfile.getNumberOfGamesPlayed())
-                .score(playerProfile.getScore()).build();
+        return new JpaPlayerProfileEntity(
+                (playerProfile.getId() != null) ? playerProfile.getId() : null,
+                playerProfile.getName().value(),
+                playerProfile.getNumberOfGamesWon(),
+                playerProfile.getNumberOfGamesPlayed(),
+                playerProfile.getScore());
     }
 
     public PlayerProfile toDomain (JpaPlayerProfileEntity entity){
-        return new PlayerProfile(
+        return PlayerProfile.reconstitute(
                 entity.getId(),
                 Name.of(entity.getName()),
-                entity.getNumberOfGamesWon(),
                 entity.getTotalGamesPlayed(),
+                entity.getNumberOfGamesWon(),
                 entity.getScore()
         );
     }

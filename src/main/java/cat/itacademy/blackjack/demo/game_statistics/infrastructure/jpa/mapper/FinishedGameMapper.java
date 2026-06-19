@@ -12,12 +12,11 @@ public class FinishedGameMapper {
     public JpaFinishedGameEntity toEntity(FinishedGame finishedGame){
         return JpaFinishedGameEntity.builder()
                 .id(null)
-                .gameId(finishedGame.getId().value())
-                .gameNumber(finishedGame.getGameNumber())
-                .userPlayer(null)
-                .numberOfRequestedCardsByUserPlayer(finishedGame.getUserPlayerHandState().numberOfRequestedCards())
-                .numberOfRequestedCardsByDealer(finishedGame.getDealerHandState().numberOfRequestedCards())
-                .totalCardsValueUserPlayer(finishedGame.getUserPlayerHandState().totalCardsValue())
+                .gameId(finishedGame.getGameId().value())
+                .player(null)
+                .playerNumberOfCards(finishedGame.getPlayerHandState().numberOfRequestedCards())
+                .dealerNumberOfCards(finishedGame.getDealerHandState().numberOfRequestedCards())
+                .totalCardsValuePlayer(finishedGame.getPlayerHandState().totalCardsValue())
                 .totalCardsValueDealer(finishedGame.getDealerHandState().totalCardsValue())
                 .gameResult(finishedGame.getGameResult())
                 .finishedWithBlackjack(finishedGame.getFinishedWithBlackjack())
@@ -28,11 +27,11 @@ public class FinishedGameMapper {
 
     public FinishedGame toDomain (JpaFinishedGameEntity finishedGameEntity){
         return FinishedGame.reconstitute(
+                finishedGameEntity.getId(),
                 GameId.fromUUID(finishedGameEntity.getGameId()),
-                finishedGameEntity.getUserPlayer().getId(),
-                finishedGameEntity.getGameNumber(),
-                HandState.create(finishedGameEntity.getNumberOfRequestedCardsByUserPlayer(), finishedGameEntity.getTotalCardsValueUserPlayer()),
-                HandState.create(finishedGameEntity.getNumberOfRequestedCardsByDealer(), finishedGameEntity.getTotalCardsValueDealer()),
+                finishedGameEntity.getPlayer().getId(),
+                HandState.create(finishedGameEntity.getPlayerNumberOfCards(), finishedGameEntity.getTotalCardsValuePlayer()),
+                HandState.create(finishedGameEntity.getDealerNumberOfCards(), finishedGameEntity.getTotalCardsValueDealer()),
                 finishedGameEntity.getGameResult(),
                 finishedGameEntity.getFinishedWithBlackjack(),
                 finishedGameEntity.getCreatedAt(),

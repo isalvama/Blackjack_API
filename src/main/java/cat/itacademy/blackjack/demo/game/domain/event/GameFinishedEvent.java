@@ -1,4 +1,4 @@
-package cat.itacademy.blackjack.demo.game.infrastructure.event;
+package cat.itacademy.blackjack.demo.game.domain.event;
 
 import cat.itacademy.blackjack.demo.game.domain.model.Game;
 
@@ -7,16 +7,15 @@ import java.util.UUID;
 
 public record GameFinishedEvent(
         UUID id,
-        String userPlayerName,
-        Integer userNumberOfCards,
+        String playerName,
+        Integer playerNumberOfCards,
         Integer dealerNumberOfCards,
-        Integer totalCardsValueUser,
+        Integer totalCardsValuePlayer,
         Integer totalCardsValueDealer,
-        LocalDateTime createdAt,
         String gameResult,
         Boolean finishedWithBlackjack,
-        LocalDateTime finishedAt
-) {
+        LocalDateTime createdAt
+        ) {
 
     public static GameFinishedEvent from (Game game){
         return new GameFinishedEvent(
@@ -26,10 +25,9 @@ public record GameFinishedEvent(
                 game.getDealer().getNumberOfCards(),
                 game.getUserPlayer().getHandValue(),
                 game.getDealer().getHandValue(),
-                game.getCreatedAt(),
                 game.getGameOutcome().result().name(),
                 game.getGameOutcome().blackjack(),
-                game.getGameOutcome().finishedAt()
-        );
+                game.getCreatedAt()
+                );
     }
 }

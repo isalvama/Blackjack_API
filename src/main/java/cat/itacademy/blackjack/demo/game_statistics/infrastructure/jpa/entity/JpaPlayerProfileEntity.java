@@ -6,31 +6,27 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Entity
 @Table(name = "player_profile")
 @Getter
-@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class JpaPlayerProfileEntity {
 
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
+        @Column(updatable = false, nullable = false)
         private Long id;
 
-        @Column(updatable = false, unique = true, length = 50)
+        @Column(updatable = false, unique = true, length = 50, nullable = false)
         private String name;
 
-        @Builder.Default
-        @Column(name = "won_games")
-        private Integer numberOfGamesWon = 0;
+        @Column(name = "played_games", nullable = false)
+        private Long totalGamesPlayed;
 
-        @Builder.Default
-        @Column(name = "played_games")
-        private Integer totalGamesPlayed = 0;
+        @Column(name = "won_games", nullable = false)
+        private Long numberOfGamesWon;
 
-        @Builder.Default
-        private Long score = 0L;
+        @Column(nullable = false)
+        private Long score;
 }
