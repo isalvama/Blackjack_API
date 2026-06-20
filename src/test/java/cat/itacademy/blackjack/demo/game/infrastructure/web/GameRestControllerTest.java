@@ -125,5 +125,8 @@ class GameRestControllerTest {
 
             verifyNoInteractions(createGameUseCase);
         }
+        // TODO BlackjackException
+        // TODO EntityConflictException
+        // TODO DomainException
     }
 }

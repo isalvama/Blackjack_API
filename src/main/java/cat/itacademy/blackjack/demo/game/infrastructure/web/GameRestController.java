@@ -6,10 +6,7 @@ import cat.itacademy.blackjack.demo.game.infrastructure.web.dto.GameResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
@@ -57,6 +54,12 @@ public class GameRestController {
                 .toUri();
 
         return ResponseEntity.created(location).body(gameResponse);
+    }
+
+    @GetMapping("{id}")
+    public ResponseEntity<GameResponseDto> getActiveGameState(@PathVariable String id) {
+        GameResponseDto gameResponse = createGameUseCase.execute(id);
+        return ResponseEntity.ok(gameResponse);
     }
 
 }
