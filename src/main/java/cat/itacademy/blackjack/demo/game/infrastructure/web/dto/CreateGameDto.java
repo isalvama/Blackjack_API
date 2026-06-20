@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Size;
 
 public record CreateGameDto (
         @NotBlank
-        @Size(min = 1, max = 50)
+        @Size(min = 1, max = 30)
         String name
 ){
 
