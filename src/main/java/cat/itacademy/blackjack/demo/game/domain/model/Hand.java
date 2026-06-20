@@ -1,6 +1,7 @@
 package cat.itacademy.blackjack.demo.game.domain.model;
 import cat.itacademy.blackjack.demo.game.domain.CardNumber;
 import cat.itacademy.blackjack.demo.game.domain.exception.InvalidGameException;
+import cat.itacademy.blackjack.demo.game.domain.exception.InvalidHandException;
 import cat.itacademy.blackjack.demo.game.domain.exception.InvalidPlayerException;
 import cat.itacademy.blackjack.demo.game.domain.value_object.Card;
 import lombok.Getter;
@@ -13,12 +14,12 @@ public class Hand {
     @Getter
     private Integer totalValue;
 
-    public Hand(List<Card> cards, Integer totalValue){
+    private Hand(List<Card> cards, Integer totalValue){
         if (cards == null){
-            throw new InvalidPlayerException("cards cannot be null");
+            throw new InvalidHandException("cards cannot be null");
         }
         if (totalValue == null){
-            throw new InvalidPlayerException("total value cannot be null");
+            throw new InvalidHandException("total value cannot be null");
         }
         this.cards = cards;
         this.totalValue = totalValue;
@@ -28,6 +29,13 @@ public class Hand {
         return new Hand(
                 new ArrayList<Card>(),
                 0
+        );
+    }
+
+    public static Hand reconstitute (List<Card> cards, Integer totalValue){
+        return new Hand(
+                cards,
+                totalValue
         );
     }
 
