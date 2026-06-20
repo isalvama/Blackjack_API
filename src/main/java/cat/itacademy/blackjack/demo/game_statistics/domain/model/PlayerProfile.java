@@ -41,20 +41,20 @@ public class PlayerProfile {
         return playerProfile;
     }
 
-    public void updateProfileWithNewGame(GameResult gameResult, Long totalCardsValue, Boolean finishedWithBlackJack){
+    public void updateProfileWithNewGame(String gameResult, Long totalCardsValue, Boolean finishedWithBlackJack){
         this.numberOfGamesWon++;
         this.numberOfGamesPlayed++;
 
-        if (gameResult.equals(GameResult.USER_WIN) && finishedWithBlackJack){
+        if (gameResult.equalsIgnoreCase(GameResult.USER_WIN.name()) && finishedWithBlackJack){
             this.score += 21;
         }
-        if (gameResult.equals(GameResult.USER_WIN) && !finishedWithBlackJack){
+        if (gameResult.equalsIgnoreCase(GameResult.USER_WIN.name()) && !finishedWithBlackJack){
             this.score += totalCardsValue;
         }
-        if (gameResult.equals(GameResult.TIE) && finishedWithBlackJack){
+        if (gameResult.equalsIgnoreCase(GameResult.TIE.name()) && finishedWithBlackJack){
             this.score += 11;
         }
-        if (gameResult.equals(GameResult.TIE) && !finishedWithBlackJack){
+        if (gameResult.equalsIgnoreCase(GameResult.TIE.name()) && !finishedWithBlackJack){
             this.score += totalCardsValue/2;
         }
     }

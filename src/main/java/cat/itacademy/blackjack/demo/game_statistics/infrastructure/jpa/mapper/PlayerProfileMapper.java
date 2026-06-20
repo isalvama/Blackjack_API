@@ -14,7 +14,7 @@ public class PlayerProfileMapper {
 
         return new JpaPlayerProfileEntity(
                 (playerProfile.getId() != null) ? playerProfile.getId() : null,
-                playerProfile.getName().value(),
+                playerProfile.getName().name(),
                 playerProfile.getNumberOfGamesWon(),
                 playerProfile.getNumberOfGamesPlayed(),
                 playerProfile.getScore());

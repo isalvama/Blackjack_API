@@ -20,7 +20,7 @@ public record GameFinishedEvent(
     public static GameFinishedEvent from (Game game){
         return new GameFinishedEvent(
                 game.getId().value(),
-                game.getUserPlayer().getName().value(),
+                game.getUserPlayer().getName().name(),
                 game.getUserPlayer().getNumberOfCards(),
                 game.getDealer().getNumberOfCards(),
                 game.getUserPlayer().getHandValue(),

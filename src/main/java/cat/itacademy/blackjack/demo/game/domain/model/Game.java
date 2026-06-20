@@ -3,7 +3,7 @@ package cat.itacademy.blackjack.demo.game.domain.model;
 import cat.itacademy.blackjack.demo.common.domain.GameResult;
 import cat.itacademy.blackjack.demo.game.application.service.shuffle_strategy.ShuffleStrategy;
 import cat.itacademy.blackjack.demo.game.domain.GameState;
-import cat.itacademy.blackjack.demo.game.domain.exception.GameException;
+import cat.itacademy.blackjack.demo.common.domain.exception.GameException;
 import cat.itacademy.blackjack.demo.game.domain.exception.InvalidGameException;
 import cat.itacademy.blackjack.demo.game.domain.exception.InvalidHitException;
 import cat.itacademy.blackjack.demo.game.domain.value_object.Card;

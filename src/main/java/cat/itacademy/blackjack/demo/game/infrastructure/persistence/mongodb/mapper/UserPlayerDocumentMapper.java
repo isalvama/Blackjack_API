@@ -11,7 +11,7 @@ public class UserPlayerDocumentMapper {
         public static UserPlayer toModelEntity(PlayerDocument doc, String userName) {
             return new UserPlayer(
                     Name.of(userName),
-                    new Hand(doc.getHand().stream().map(CardDocumentMapper::toModelEntity).toList(), doc.getTotalCardsValue())
+                    Hand.reconstitute(doc.getHand().stream().map(CardDocumentMapper::toModelEntity).toList(), doc.getTotalCardsValue())
             );
         }
 }

@@ -1,19 +1,16 @@
 package cat.itacademy.blackjack.demo.game.domain.model;
 
-import cat.itacademy.blackjack.demo.game.domain.CardNumber;
 import cat.itacademy.blackjack.demo.game.domain.exception.InvalidGameException;
 import cat.itacademy.blackjack.demo.game.domain.exception.InvalidPlayerException;
 import cat.itacademy.blackjack.demo.game.domain.value_object.Card;
 
-import java.util.List;
-
 public abstract class Player {
     private Hand hand;
 
-    public Player(Hand hand) {
+    protected Player(Hand hand) {
 
         if (hand == null){
-            throw new InvalidPlayerException("hand cannot be null");
+            throw new InvalidPlayerException("playerHand cannot be null");
         }
         this.hand = hand;
     }
