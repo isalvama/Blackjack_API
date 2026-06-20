@@ -25,7 +25,6 @@ public class Game {
     private LocalDateTime lastTimePlayedAt;
 
     private Game(GameId id, UserPlayer userPlayer, Dealer dealer, Deck deck) {
-
         if (deck.getCards().isEmpty()){
             throw new InvalidGameException("deck's list of cards cannot be empty");
         }

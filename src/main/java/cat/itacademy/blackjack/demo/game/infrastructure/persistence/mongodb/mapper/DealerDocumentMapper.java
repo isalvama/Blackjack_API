@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
     @Component
     public class DealerDocumentMapper {
         public static Dealer toModelEntity(PlayerDocument doc) {
-            return new Dealer(
+            return Dealer.reconstitute(
                     Hand.reconstitute(doc.getHand().stream().map(CardDocumentMapper::toModelEntity).toList(), doc.getTotalCardsValue())
             );
         }

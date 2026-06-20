@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserPlayerDocumentMapper {
         public static UserPlayer toModelEntity(PlayerDocument doc, String userName) {
-            return new UserPlayer(
+            return UserPlayer.reconstitute(
                     Name.of(userName),
                     Hand.reconstitute(doc.getHand().stream().map(CardDocumentMapper::toModelEntity).toList(), doc.getTotalCardsValue())
             );

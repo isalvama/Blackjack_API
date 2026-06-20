@@ -62,6 +62,10 @@ public class Hand {
         return hasAce && hasJack;
     }
 
+    boolean isEmpty(){
+        return this.cards.isEmpty();
+    }
+
     public List<Card> getCards() {
         return List.copyOf(cards);
     }

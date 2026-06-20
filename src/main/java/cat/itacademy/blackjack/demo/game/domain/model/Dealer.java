@@ -1,13 +1,24 @@
 package cat.itacademy.blackjack.demo.game.domain.model;
 
-public class Dealer extends Player{
-    public Dealer(Hand handCards) {
+import cat.itacademy.blackjack.demo.game.domain.exception.InvalidPlayerException;
+
+public class Dealer extends Player {
+    private Dealer(Hand handCards) {
         super(handCards);
     }
 
     public static Dealer create(){
         return new Dealer(
                 Hand.create()
+        );
+    }
+
+    public static Dealer reconstitute(Hand hand) {
+        if (hand != null && hand.isEmpty()){
+            throw new InvalidPlayerException("hand cannot be empty");
+        }
+        return new Dealer(
+                hand
         );
     }
 
