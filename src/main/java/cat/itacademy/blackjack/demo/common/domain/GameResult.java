@@ -1,17 +1,17 @@
 package cat.itacademy.blackjack.demo.common.domain;
 
-import cat.itacademy.blackjack.demo.game_statistics.domain.exception.InvalidGameResultException;
+import cat.itacademy.blackjack.demo.common.domain.exception.InvalidGameResultException;
 
 public enum GameResult {
     USER_WIN,
     DEALER_WIN,
     TIE;
 
-    public static GameResult from (String gameResultString){
+    public static GameResult fromString (String gameResultString){
         try {
-            return GameResult.valueOf(gameResultString.toUpperCase());
+            return GameResult.valueOf(gameResultString.toUpperCase().trim());
         } catch (IllegalArgumentException e) {
-           throw new InvalidGameResultException("Invalid Game Result: " + e.getMessage());
+           throw new InvalidGameResultException("the string " + gameResultString + " does not match any name of the constants of GameResult");
         }
     }
 }
