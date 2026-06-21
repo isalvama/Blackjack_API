@@ -1,5 +1,6 @@
 import cat.itacademy.blackjack.demo.BlackjackApplication;
 import cat.itacademy.blackjack.demo.common.domain.GameResult;
+import cat.itacademy.blackjack.demo.common.domain.value_object.GameId;
 import cat.itacademy.blackjack.demo.game.infrastructure.web.dto.CreateGameDto;
 import cat.itacademy.blackjack.demo.shuffle_strategy.GameWithoutBlackJackStrategyConfig;
 import cat.itacademy.blackjack.demo.shuffle_strategy.TieWithBlackjackShuffleStrategyConfig;
@@ -173,6 +174,7 @@ public class BlackjackIntegrationTest {
                         .andExpect(jsonPath("$.gameState").value("OVER"))
                         .andExpect(jsonPath("$.gameResult").value(GameResult.TIE.name()))
                         .andExpect(jsonPath("$.finishedWithBlackjack").value("true"));
+
                 String resultAsString = result.andReturn().getResponse().getContentAsString();
                 String createdAtFromEscapedJson = com.jayway.jsonpath.JsonPath.read(resultAsString, "$.createdAt");
                 LocalDateTime createdAt = LocalDateTime.parse(createdAtFromEscapedJson);
@@ -183,6 +185,52 @@ public class BlackjackIntegrationTest {
                 assertThat(lastTimePlayedAt).isAfter(LocalDateTime.now().minusMinutes(1));
 
                 assertThat(lastTimePlayedAt).isAfter(createdAt);
+            }
+        }
+
+        @Nested
+        @DisplayName("GET " + BASE_API + "/{id}")
+        class GetActiveGameState {
+
+            @DisplayName("should return 200 with information about the state of the game")
+            @Test
+            void shouldGetInforAboutTheStateOfTheGameCreated() throws Exception {
+                CreateGameDto createGameDto = new CreateGameDto(NAME);
+
+                ResultActions resultCreate = mockMvc.perform(MockMvcRequestBuilders.post(BASE_API)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createGameDto)));
+
+                String resultAsString = resultCreate.andReturn().getResponse().getContentAsString();
+                String idFromJson = com.jayway.jsonpath.JsonPath.read(resultAsString, "$.id");
+
+                ResultActions result = mockMvc.perform(MockMvcRequestBuilders.get(BASE_API + "/" + idFromJson)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createGameDto)));
+
+                result.andExpect(status().isOk())
+                        .andExpect(jsonPath("$.id").value(idFromJson))
+                        .andExpect(jsonPath("$.createdAt").exists())
+                        .andExpect(jsonPath("$.lastTimePlayedAt").exists())
+                        .andExpect(jsonPath("$.username").value(NAME))
+                        .andExpect(jsonPath("$.playerTotalCardsValue").isNumber())
+                        .andExpect(jsonPath("$.playerHand", hasSize(2)))
+                        .andExpect(jsonPath("$.dealerFirstCard").exists());
+            }
+
+            @DisplayName("should return 404 Game Not Found when the game requested does not exist")
+            @Test
+            void shouldReturn404NotFound() throws Exception {
+                String idStr = GameId.generate().toString();
+
+                ResultActions result = mockMvc.perform(MockMvcRequestBuilders.get(BASE_API + "/" + idStr)
+                        .contentType(MediaType.APPLICATION_JSON));
+                result.andExpect(status().isNotFound())
+                        .andExpect(jsonPath("$.detail", containsString("Game Not Found")))
+                        .andExpect(jsonPath("$.detail", containsString("games")))
+                        .andExpect(jsonPath("$.detail", containsString("found")))
+                        .andExpect(jsonPath("$.detail", containsString("id")))
+                        .andExpect(jsonPath("$.detail", containsString(idStr)));
             }
         }
     }
