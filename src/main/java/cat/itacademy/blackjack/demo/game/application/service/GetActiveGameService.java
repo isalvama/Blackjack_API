@@ -1,7 +1,10 @@
 package cat.itacademy.blackjack.demo.game.application.service;
 
+import cat.itacademy.blackjack.demo.common.domain.value_object.GameId;
 import cat.itacademy.blackjack.demo.game.application.port.in.GetActiveGameUseCase;
 import cat.itacademy.blackjack.demo.game.application.port.out.ActiveGamePort;
+import cat.itacademy.blackjack.demo.game.domain.exception.GameNotFoundException;
+import cat.itacademy.blackjack.demo.game.domain.model.Game;
 import cat.itacademy.blackjack.demo.game.infrastructure.web.dto.GameResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,7 +16,7 @@ public class GetActiveGameService implements GetActiveGameUseCase {
 
     @Override
     public GameResponseDto execute(String id) {
-
-        return null;
+        Game game = gamePort.getGame(GameId.fromString(id)).orElseThrow(() -> new GameNotFoundException("no games found with id " + id));
+        return GameResponseDto.from(game);
     }
 }
