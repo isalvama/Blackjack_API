@@ -2,6 +2,7 @@ package cat.itacademy.blackjack.demo.common.infrastructure.web.handler;
 
 import cat.itacademy.blackjack.demo.common.domain.exception.BlackjackException;
 import cat.itacademy.blackjack.demo.common.domain.exception.DomainException;
+import cat.itacademy.blackjack.demo.game.domain.exception.GameNotFoundException;
 import cat.itacademy.blackjack.demo.game_statistics.application.exception.EntityConflictException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,15 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ResponseBody
+    @ExceptionHandler(GameNotFoundException.class)
+    public ProblemDetail handleGameNotFoundException(DomainException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
+        problemDetail.setTitle("Inexistence Error");
+        problemDetail.setDetail(ex.getMessage());
+        return problemDetail;
+    }
 
     @ResponseBody
     @ExceptionHandler(DomainException.class)
