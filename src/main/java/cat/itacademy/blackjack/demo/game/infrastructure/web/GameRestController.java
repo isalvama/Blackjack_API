@@ -1,15 +1,15 @@
 package cat.itacademy.blackjack.demo.game.infrastructure.web;
 
 import cat.itacademy.blackjack.demo.game.application.port.in.CreateGameUseCase;
+import cat.itacademy.blackjack.demo.game.application.port.in.GetActiveGameUseCase;
 import cat.itacademy.blackjack.demo.game.infrastructure.web.dto.CreateGameDto;
 import cat.itacademy.blackjack.demo.game.infrastructure.web.dto.GameResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.validator.constraints.UUID;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
@@ -24,16 +24,18 @@ import java.net.URI;
  * <p>This controller handles the following operations:</p>
  * <ul>
  *   <li>Game creation and intial state information</li>
- *   <li>Cash deposits and withdrawals</li> TODO
+ *   <li>Active Game State retrieval</li> TODO
  *   <li>Stock purchases and sales</li> TODO
  *   <li>Transaction history retrieval</li> TODO
  * </ul>
  */
 @RestController
 @RequestMapping("/api/blackjack")
+@Validated
 @RequiredArgsConstructor
 public class GameRestController {
     private final CreateGameUseCase createGameUseCase;
+    private final GetActiveGameUseCase getActiveGameUseCase;
 
     /**
      * Creates a new game.
@@ -57,6 +59,12 @@ public class GameRestController {
                 .toUri();
 
         return ResponseEntity.created(location).body(gameResponse);
+    }
+
+    @GetMapping("{id}")
+    public ResponseEntity<GameResponseDto> getActiveGameState(@PathVariable @UUID String id) {
+        GameResponseDto gameResponse = getActiveGameUseCase.execute(id);
+        return ResponseEntity.ok(gameResponse);
     }
 
 }

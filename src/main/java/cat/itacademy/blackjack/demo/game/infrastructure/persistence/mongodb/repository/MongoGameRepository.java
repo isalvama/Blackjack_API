@@ -1,5 +1,6 @@
 package cat.itacademy.blackjack.demo.game.infrastructure.persistence.mongodb.repository;
 
+import cat.itacademy.blackjack.demo.common.domain.value_object.GameId;
 import cat.itacademy.blackjack.demo.game.application.port.out.ActiveGamePort;
 import cat.itacademy.blackjack.demo.game.domain.model.Game;
 import cat.itacademy.blackjack.demo.game.infrastructure.persistence.mongodb.springdatarepository.MongoGameSpringDataRepository;
@@ -9,6 +10,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Profile("mongodb")
 @Repository
@@ -28,5 +30,11 @@ public class MongoGameRepository implements ActiveGamePort {
         gameDocument.setLastTimePlayedAt(LocalDateTime.now());
         GameDocument docCreated = mongoGameSpringDataRepository.insert(gameDocument);
        return GameDocumentMapper.toModelEntity(docCreated);
+    }
+
+    @Override
+    public Optional<Game> getGame(GameId id) {
+        return mongoGameSpringDataRepository.findById(id.toString())
+                .map(GameDocumentMapper::toModelEntity);
     }
 }
