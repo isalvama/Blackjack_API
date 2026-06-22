@@ -15,6 +15,8 @@ import cat.itacademy.blackjack.demo.game.infrastructure.web.dto.GameResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class CreateGameService implements CreateGameUseCase {
@@ -27,13 +29,13 @@ public class CreateGameService implements CreateGameUseCase {
         UserPlayer player = UserPlayer.create(Name.of(name));
         Game game = Game.create(player, Dealer.create(), Deck.create());
         game.start(shuffleStrategy);
-
-        Game savedGame = gamePort.saveGame(game);
-        game.updateAuditInfo(savedGame.getCreatedAt(), savedGame.getLastTimePlayedAt());
+        game.updateAuditInfo(LocalDateTime.now(), LocalDateTime.now());
 
         if (game.getGameState() == GameState.OVER){
-            eventPublisher.publishEvent(GameFinishedEvent.from(game)
-            );
+            gamePort.deleteActiveGame(game.getId());
+            eventPublisher.publishEvent(GameFinishedEvent.from(game));
+        } else {
+            game = gamePort.saveActiveGame(game);
         }
         return GameResponseDto.from(game);
     }

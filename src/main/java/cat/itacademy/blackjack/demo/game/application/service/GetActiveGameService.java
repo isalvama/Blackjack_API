@@ -16,7 +16,7 @@ public class GetActiveGameService implements GetActiveGameUseCase {
 
     @Override
     public GameResponseDto execute(String id) {
-        Game game = gamePort.getGame(GameId.fromString(id)).orElseThrow(() -> new GameNotFoundException(id));
+        Game game = gamePort.getActiveGame(GameId.fromString(id)).orElseThrow(() -> new GameNotFoundException(id));
         return GameResponseDto.from(game);
     }
 }

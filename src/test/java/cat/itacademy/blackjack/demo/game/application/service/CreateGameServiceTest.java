@@ -57,7 +57,7 @@ class CreateGameServiceTest {
             when(mockSavedGame.getCreatedAt()).thenReturn(now);
             when(mockSavedGame.getLastTimePlayedAt()).thenReturn(now);
 
-            when(gamePort.saveGame(any(Game.class))).thenReturn(mockSavedGame);
+            when(gamePort.saveActiveGame(any(Game.class))).thenReturn(mockSavedGame);
 
             GameResponseDto result = createGameService.execute(PLAYER_NAME);
 
@@ -73,7 +73,7 @@ class CreateGameServiceTest {
             assertNull(result.gameResult());
             assertNull(result.finishedWithBlackjack());
 
-            verify(gamePort, times(1)).saveGame(any(Game.class));
+            verify(gamePort, times(1)).saveActiveGame(any(Game.class));
             verify(eventPublisher, never()).publishEvent(any());
         }
     }
@@ -92,7 +92,7 @@ class CreateGameServiceTest {
                 return cards;
             });
 
-            when(gamePort.saveGame(any(Game.class))).thenAnswer(invocation -> {
+            when(gamePort.saveActiveGame(any(Game.class))).thenAnswer(invocation -> {
                 Game gameArg = invocation.getArgument(0);
                 gameArg.updateAuditInfo(now, now);
                 return gameArg;
@@ -113,7 +113,7 @@ class CreateGameServiceTest {
             assertTrue(result.finishedWithBlackjack());
 
 
-            verify(gamePort, times(1)).saveGame(any(Game.class));
+            verify(gamePort, times(1)).saveActiveGame(any(Game.class));
             verify(eventPublisher, times(1)).publishEvent(any(GameFinishedEvent.class));
         }
     }

@@ -12,6 +12,8 @@ import cat.itacademy.blackjack.demo.game.infrastructure.web.dto.GameResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class HitService implements HitUseCase {
@@ -21,14 +23,15 @@ public class HitService implements HitUseCase {
 
     @Override
     public GameResponseDto execute(String id) {
-        Game game = gamePort.getGame(GameId.fromString(id)).orElseThrow(() -> new GameNotFoundException(id));
+        Game game = gamePort.getActiveGame(GameId.fromString(id)).orElseThrow(() -> new GameNotFoundException(id));
         game.hit();
-        Game savedGame = gamePort.saveGame(game);
-        game.updateAuditInfo(savedGame.getLastTimePlayedAt());
+        game.updateAuditInfo(LocalDateTime.now());
 
         if (game.getGameState() == GameState.OVER){
-            eventPublisher.publishEvent(GameFinishedEvent.from(game)
-            );
+            gamePort.deleteActiveGame(game.getId());
+            eventPublisher.publishEvent(GameFinishedEvent.from(game));
+        } else {
+            gamePort.saveActiveGame(game);
         }
         return GameResponseDto.from(game);
     }
