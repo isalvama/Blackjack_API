@@ -13,11 +13,12 @@ LocalDateTime lastTimePlayedAt,
 String username,
 Integer playerTotalCardsValue,
 List<CardDto> playerHand,
-Card dealerFirstCard,
+CardDto dealerFirstCard,
 Integer dealerTotalCardsValue,
 String gameState,
 String gameResult,
-Boolean finishedWithBlackjack
+Boolean finishedWithBlackjack,
+List<CardDto> dealerFinalHand
 ) {
     public static GameResponseDto from (Game game){
         var outcome = game.getGameOutcome();
@@ -29,11 +30,12 @@ Boolean finishedWithBlackjack
                 game.getUserPlayer().getName().name(),
                 game.getUserPlayer().getHandValue(),
                 game.getUserPlayer().getHand().getCards().stream().map(CardDto::from).toList(),
-                game.getDealer().getHand().getCards().getFirst(),
+                CardDto.from(game.getDealer().getHand().getCards().getFirst()),
                 game.getDealer().getHandValue(),
                 game.getGameState().name(),
                 outcome != null ? game.getGameOutcome().result().name() : null,
-                outcome != null ? game.getGameOutcome().blackjack() : null
+                outcome != null ? game.getGameOutcome().blackjack() : null,
+                outcome != null ? game.getDealer().getHand().getCards().stream().map(CardDto::from).toList() : null
         );
     }
 }
