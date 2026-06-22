@@ -580,5 +580,17 @@ public class BlackjackIntegrationTest {
                     .andExpect(jsonPath("$[0].id").exists())
                     .andExpect(jsonPath("$[1].id").exists());
         }
+
+        @Test
+        void shouldReturn200WithAnEmptyList() throws Exception {
+
+            ResultActions result = mockMvc.perform(MockMvcRequestBuilders.get(BASE_API)
+                    .contentType(MediaType.APPLICATION_JSON));
+
+            result.andExpect(status().isOk())
+                    .andExpect(jsonPath("$", hasSize(0)))
+                    .andExpect(jsonPath("$[0].id").doesNotExist())
+                    .andExpect(jsonPath("$[1].id").doesNotExist());
+        }
     }
 }
