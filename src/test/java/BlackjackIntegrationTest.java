@@ -3,10 +3,7 @@ import cat.itacademy.blackjack.demo.common.domain.GameResult;
 import cat.itacademy.blackjack.demo.common.domain.value_object.GameId;
 import cat.itacademy.blackjack.demo.game.domain.GameState;
 import cat.itacademy.blackjack.demo.game.infrastructure.web.dto.CreateGameDto;
-import cat.itacademy.blackjack.demo.shuffle_strategy.GameWithoutBlackJackStrategyConfig;
-import cat.itacademy.blackjack.demo.shuffle_strategy.PlayerLosingStrategyConfig;
-import cat.itacademy.blackjack.demo.shuffle_strategy.TieWithBlackjackShuffleStrategyConfig;
-import cat.itacademy.blackjack.demo.shuffle_strategy.UserWinningWithBlackjackStrategyConfig;
+import cat.itacademy.blackjack.demo.shuffle_strategy.*;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -238,7 +235,7 @@ public class BlackjackIntegrationTest {
         }
     }
         @Nested
-        @DisplayName("POST /api/blackjack/{id}/hit")
+        @DisplayName("POST " + BASE_API + "/{id}/hit")
         class Hit {
 
             @Test
@@ -291,8 +288,8 @@ public class BlackjackIntegrationTest {
             }
 
             @Nested
-            @Import(PlayerLosingStrategyConfig.class)
-            class GameIsFinishedAfterHit{
+            @Import(PlayerLosingByExceeding21StrategyConfig.class)
+            class GameIsFinishedAfterHitBecausePlayerExceeded21{
 
                 @Autowired
                 private MockMvc mockMvc;
@@ -342,4 +339,219 @@ public class BlackjackIntegrationTest {
                         .andExpect(jsonPath("$.detail", containsString("found")));
             }
         }
+
+    @Nested
+    @DisplayName("POST " + BASE_API + "/{id}/stand")
+    class Stand {
+
+        @Test
+        void shouldReturn400ValidationErrorInvalidId() throws Exception {
+            String invalidId = "invalid-id";
+
+            ResultActions result = mockMvc.perform(MockMvcRequestBuilders.post(BASE_API + "/" + invalidId + "/stand")
+                    .contentType(MediaType.APPLICATION_JSON));
+
+            result.andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.title", Matchers.containsString("Validation Error in Parameter")));
+
+        }
+
+        @DisplayName("should return 404 Game Not Found when the service throws a GameNotFoundException")
+        @Test
+        void shouldReturn404NotFound() throws Exception {
+            String generatedId = GameId.generate().toString();
+
+            ResultActions result = mockMvc.perform(MockMvcRequestBuilders.post(BASE_API + "/" + generatedId + "/stand")
+                    .contentType(MediaType.APPLICATION_JSON));
+
+            result.andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.detail", containsString("Game")))
+                    .andExpect(jsonPath("$.detail", containsString("not")))
+                    .andExpect(jsonPath("$.detail", containsString("found")))
+                    .andExpect(jsonPath("$.detail", containsString(generatedId)));
+        }
+
+        @Nested
+        @Import(DealerWinningWithBlackJackStrategyConfig.class)
+        class DealerWinningWithBlackJackStrategyGame {
+
+            @Autowired
+            private MockMvc mockMvc;
+
+            @Test
+            void shouldReturnActiveGameInfoData() throws Exception {
+                CreateGameDto createGameDto = new CreateGameDto(NAME);
+
+                ResultActions resultCreate = mockMvc.perform(MockMvcRequestBuilders.post(BASE_API)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createGameDto)));
+
+                String resultAsString = resultCreate.andReturn().getResponse().getContentAsString();
+                String idFromJson = com.jayway.jsonpath.JsonPath.read(resultAsString, "$.id");
+
+                ResultActions result = mockMvc.perform(MockMvcRequestBuilders.post(BASE_API + "/" + idFromJson + "/stand")
+                        .contentType(MediaType.APPLICATION_JSON));
+
+                result.andExpect(status().isOk())
+                        .andExpect(jsonPath("$.id").value(idFromJson))
+                        .andExpect(jsonPath("$.createdAt").exists())
+                        .andExpect(jsonPath("$.lastTimePlayedAt").exists())
+                        .andExpect(jsonPath("$.username").value(NAME))
+                        .andExpect(jsonPath("$.playerTotalCardsValue").isNumber())
+                        .andExpect(jsonPath("$.playerHand", hasSize(2)))
+                        .andExpect(jsonPath("$.dealerFirstCard").exists())
+                        .andExpect(jsonPath("$.dealerTotalCardsValue").value(21))
+                        .andExpect(jsonPath("$.gameState").value("OVER"))
+                        .andExpect(jsonPath("$.gameResult").value(GameResult.DEALER_WIN.name()))
+                        .andExpect(jsonPath("$.finishedWithBlackjack").value(true))
+                        .andExpect(jsonPath("$.dealerFinalHand", hasSize(2)));
+            }
+        }
+        @Nested
+        @Import(PlayerWinningByCardsValueStrategyConfig.class)
+        class PlayerWinningByCardsValueStrategyGame {
+
+            @Autowired
+            private MockMvc mockMvc;
+
+            @Test
+            void shouldReturnActiveGameInfoData() throws Exception {
+                CreateGameDto createGameDto = new CreateGameDto(NAME);
+
+                ResultActions resultCreate = mockMvc.perform(MockMvcRequestBuilders.post(BASE_API)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createGameDto)));
+
+                String resultAsString = resultCreate.andReturn().getResponse().getContentAsString();
+                String idFromJson = com.jayway.jsonpath.JsonPath.read(resultAsString, "$.id");
+
+                ResultActions result = mockMvc.perform(MockMvcRequestBuilders.post(BASE_API + "/" + idFromJson + "/stand")
+                        .contentType(MediaType.APPLICATION_JSON));
+
+                result.andExpect(status().isOk())
+                        .andExpect(jsonPath("$.id").value(idFromJson))
+                        .andExpect(jsonPath("$.createdAt").exists())
+                        .andExpect(jsonPath("$.lastTimePlayedAt").exists())
+                        .andExpect(jsonPath("$.username").value(NAME))
+                        .andExpect(jsonPath("$.playerTotalCardsValue").isNumber())
+                        .andExpect(jsonPath("$.playerHand", hasSize(2)))
+                        .andExpect(jsonPath("$.dealerFirstCard").exists())
+                        .andExpect(jsonPath("$.dealerTotalCardsValue").exists())
+                        .andExpect(jsonPath("$.gameState").value("OVER"))
+                        .andExpect(jsonPath("$.gameResult").value(GameResult.USER_WIN.name()))
+                        .andExpect(jsonPath("$.finishedWithBlackjack").value(false))
+                        .andExpect(jsonPath("$.dealerFinalHand", hasSize(2)));
+            }
+        }
+
+        @Nested
+        @Import(DealerWinningByCardsValueStrategyConfig.class)
+        class DealerWinningByCardsValueStrategyGame {
+
+            @Autowired
+            private MockMvc mockMvc;
+
+            @Test
+            void shouldReturnActiveGameInfoData() throws Exception {
+                CreateGameDto createGameDto = new CreateGameDto(NAME);
+
+                ResultActions resultCreate = mockMvc.perform(MockMvcRequestBuilders.post(BASE_API)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createGameDto)));
+
+                String resultAsString = resultCreate.andReturn().getResponse().getContentAsString();
+                String idFromJson = com.jayway.jsonpath.JsonPath.read(resultAsString, "$.id");
+
+                ResultActions result = mockMvc.perform(MockMvcRequestBuilders.post(BASE_API + "/" + idFromJson + "/stand")
+                        .contentType(MediaType.APPLICATION_JSON));
+
+                result.andExpect(status().isOk())
+                        .andExpect(jsonPath("$.id").value(idFromJson))
+                        .andExpect(jsonPath("$.createdAt").exists())
+                        .andExpect(jsonPath("$.lastTimePlayedAt").exists())
+                        .andExpect(jsonPath("$.username").value(NAME))
+                        .andExpect(jsonPath("$.playerTotalCardsValue").isNumber())
+                        .andExpect(jsonPath("$.playerHand", hasSize(2)))
+                        .andExpect(jsonPath("$.dealerFirstCard").exists())
+                        .andExpect(jsonPath("$.dealerTotalCardsValue").exists())
+                        .andExpect(jsonPath("$.gameState").value("OVER"))
+                        .andExpect(jsonPath("$.gameResult").value(GameResult.DEALER_WIN.name()))
+                        .andExpect(jsonPath("$.finishedWithBlackjack").value(false))
+                        .andExpect(jsonPath("$.dealerFinalHand", hasSize(2)));
+            }
+        }
+        @Nested
+        @Import(TieWithoutBlackJackStrategyConfig.class)
+        class TieWithoutBlackJackStrategyGame {
+
+            @Autowired
+            private MockMvc mockMvc;
+
+            @Test
+            void shouldReturnActiveGameInfoData() throws Exception {
+                CreateGameDto createGameDto = new CreateGameDto(NAME);
+
+                ResultActions resultCreate = mockMvc.perform(MockMvcRequestBuilders.post(BASE_API)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createGameDto)));
+
+                String resultAsString = resultCreate.andReturn().getResponse().getContentAsString();
+                String idFromJson = com.jayway.jsonpath.JsonPath.read(resultAsString, "$.id");
+
+                ResultActions result = mockMvc.perform(MockMvcRequestBuilders.post(BASE_API + "/" + idFromJson + "/stand")
+                        .contentType(MediaType.APPLICATION_JSON));
+
+                result.andExpect(status().isOk())
+                        .andExpect(jsonPath("$.id").value(idFromJson))
+                        .andExpect(jsonPath("$.createdAt").exists())
+                        .andExpect(jsonPath("$.lastTimePlayedAt").exists())
+                        .andExpect(jsonPath("$.username").value(NAME))
+                        .andExpect(jsonPath("$.playerTotalCardsValue").isNumber())
+                        .andExpect(jsonPath("$.playerHand", hasSize(2)))
+                        .andExpect(jsonPath("$.dealerFirstCard").exists())
+                        .andExpect(jsonPath("$.dealerTotalCardsValue").exists())
+                        .andExpect(jsonPath("$.gameState").value("OVER"))
+                        .andExpect(jsonPath("$.gameResult").value(GameResult.TIE.name()))
+                        .andExpect(jsonPath("$.finishedWithBlackjack").value(false))
+                        .andExpect(jsonPath("$.dealerFinalHand", hasSize(2)));
+            }
+        }
+
+        @Nested
+        @Import(DealerLosingByExceeding21StrategyConfig.class)
+        class DealerLosingByExceeding21StrategyGame {
+
+            @Autowired
+            private MockMvc mockMvc;
+
+            @Test
+            void shouldReturnActiveGameInfoData() throws Exception {
+                CreateGameDto createGameDto = new CreateGameDto(NAME);
+
+                ResultActions resultCreate = mockMvc.perform(MockMvcRequestBuilders.post(BASE_API)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createGameDto)));
+
+                String resultAsString = resultCreate.andReturn().getResponse().getContentAsString();
+                String idFromJson = com.jayway.jsonpath.JsonPath.read(resultAsString, "$.id");
+
+                ResultActions result = mockMvc.perform(MockMvcRequestBuilders.post(BASE_API + "/" + idFromJson + "/stand")
+                        .contentType(MediaType.APPLICATION_JSON));
+
+                result.andExpect(status().isOk())
+                        .andExpect(jsonPath("$.id").value(idFromJson))
+                        .andExpect(jsonPath("$.createdAt").exists())
+                        .andExpect(jsonPath("$.lastTimePlayedAt").exists())
+                        .andExpect(jsonPath("$.username").value(NAME))
+                        .andExpect(jsonPath("$.playerTotalCardsValue").isNumber())
+                        .andExpect(jsonPath("$.playerHand", hasSize(2)))
+                        .andExpect(jsonPath("$.dealerFirstCard").exists())
+                        .andExpect(jsonPath("$.dealerTotalCardsValue").exists())
+                        .andExpect(jsonPath("$.gameState").value("OVER"))
+                        .andExpect(jsonPath("$.gameResult").value(GameResult.USER_WIN.name()))
+                        .andExpect(jsonPath("$.finishedWithBlackjack").value(false))
+                        .andExpect(jsonPath("$.dealerFinalHand", hasSize(3)));
+            }
+        }
+    }
 }

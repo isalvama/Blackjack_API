@@ -3,11 +3,9 @@ package cat.itacademy.blackjack.demo.game.infrastructure.web;
 import cat.itacademy.blackjack.demo.game.application.port.in.CreateGameUseCase;
 import cat.itacademy.blackjack.demo.game.application.port.in.GetActiveGameUseCase;
 import cat.itacademy.blackjack.demo.game.application.port.in.HitUseCase;
-import cat.itacademy.blackjack.demo.game.domain.CardNumber;
+import cat.itacademy.blackjack.demo.game.application.port.in.StandUseCase;
 import cat.itacademy.blackjack.demo.game.domain.GameState;
-import cat.itacademy.blackjack.demo.game.domain.Suit;
 import cat.itacademy.blackjack.demo.game.domain.exception.GameNotFoundException;
-import cat.itacademy.blackjack.demo.game.domain.value_object.Card;
 import cat.itacademy.blackjack.demo.game.infrastructure.web.dto.CardDto;
 import cat.itacademy.blackjack.demo.game.infrastructure.web.dto.CreateGameDto;
 import cat.itacademy.blackjack.demo.game.infrastructure.web.dto.GameResponseDto;
@@ -43,18 +41,35 @@ class GameRestControllerTest {
     private static final String ID = UUID.randomUUID().toString();
     private static final String NAME = "Player Name";
     private static String GAME_STATE_STARTED = GameState.STARTED.toString();
-    private static final GameResponseDto GAME_RESPONSE_DTO = new GameResponseDto(
+    private static String GAME_STATE_OVER = GameState.OVER.toString();
+    private static final GameResponseDto GAME_RESPONSE_DTO_STARTED = new GameResponseDto(
             ID,
             LocalDateTime.now(),
             LocalDateTime.now(),
             NAME,
             21,
             List.of(new CardDto("ACE", "CLUBS"), new CardDto("JACK", "CLUBS")),
-            new Card(CardNumber.EIGHT, Suit.DIAMONDS),
+            new CardDto("EIGHT", "DIAMONDS"),
             8,
             GAME_STATE_STARTED,
             null,
+            null,
             null
+    );
+
+    private static final GameResponseDto GAME_RESPONSE_DTO_OVER = new GameResponseDto(
+            ID,
+            LocalDateTime.now(),
+            LocalDateTime.now(),
+            NAME,
+            21,
+            List.of(new CardDto("ACE", "CLUBS"), new CardDto("EIGHT", "CLUBS")),
+            new CardDto("EIGHT", "DIAMONDS"),
+            8,
+            GAME_STATE_OVER,
+            "USER_WIN",
+            false,
+            List.of(new CardDto("EIGHT", "HEARTS"), new CardDto("TWO", "HEARTS"))
     );
 
     private static final String API_URL = "/api/blackjack";
@@ -68,10 +83,13 @@ class GameRestControllerTest {
     private CreateGameUseCase createGameUseCase;
 
     @MockitoBean
+    private GetActiveGameUseCase getActiveGameUseCase;
+
+    @MockitoBean
     private HitUseCase hitUseCase;
 
     @MockitoBean
-    private GetActiveGameUseCase getActiveGameUseCase;
+    private StandUseCase standUseCase;
 
     @BeforeEach
     void setUp() {
@@ -87,7 +105,7 @@ class GameRestControllerTest {
             String name = "Player Name";
             CreateGameDto createGameDto = new CreateGameDto("Player Name");
 
-            when(createGameUseCase.execute(name)).thenReturn(GAME_RESPONSE_DTO);
+            when(createGameUseCase.execute(name)).thenReturn(GAME_RESPONSE_DTO_STARTED);
 
             ResultActions result = mockMvc.perform(post(API_URL)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -160,7 +178,7 @@ class GameRestControllerTest {
         @Test
         void shouldReturnActiveGameInfoData() throws Exception {
 
-            when(getActiveGameUseCase.execute(ID)).thenReturn(GAME_RESPONSE_DTO);
+            when(getActiveGameUseCase.execute(ID)).thenReturn(GAME_RESPONSE_DTO_STARTED);
 
             ResultActions result = mockMvc.perform(MockMvcRequestBuilders.get(API_URL + "/" + ID)
                     .contentType(MediaType.APPLICATION_JSON));
@@ -210,13 +228,13 @@ class GameRestControllerTest {
             result.andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.title", Matchers.containsString("Validation Error in Parameter")));
 
-            verifyNoInteractions(createGameUseCase);
+            verifyNoInteractions(standUseCase);
         }
 
         @Test
         void shouldReturnActiveGameInfoData() throws Exception {
 
-            when(hitUseCase.execute(ID)).thenReturn(GAME_RESPONSE_DTO);
+            when(standUseCase.execute(ID)).thenReturn(GAME_RESPONSE_DTO_STARTED);
 
             ResultActions result = mockMvc.perform(MockMvcRequestBuilders.post(API_URL + "/" + ID + "/hit")
                     .contentType(MediaType.APPLICATION_JSON));
@@ -243,6 +261,65 @@ class GameRestControllerTest {
             when(hitUseCase.execute(ID)).thenThrow(new GameNotFoundException(ID));
 
             ResultActions result = mockMvc.perform(MockMvcRequestBuilders.post(API_URL + "/" + ID + "/hit")
+                    .contentType(MediaType.APPLICATION_JSON));
+
+            result.andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.detail", containsString("Game")))
+                    .andExpect(jsonPath("$.detail", containsString("not")))
+                    .andExpect(jsonPath("$.detail", containsString("found")))
+                    .andExpect(jsonPath("$.detail", containsString(ID)));
+        }
+    }
+
+    @Nested
+    @DisplayName("POST /api/blackjack/{id}/stand")
+    class Stand {
+
+        @Test
+        void shouldReturn400ValidationErrorInvalidId() throws Exception {
+            String invalidId = "invalid-id";
+
+            ResultActions result = mockMvc.perform(MockMvcRequestBuilders.post(API_URL + "/" + invalidId + "/stand")
+                    .contentType(MediaType.APPLICATION_JSON));
+
+            result.andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.title", Matchers.containsString("Validation Error in Parameter")));
+
+            verifyNoInteractions(standUseCase);
+        }
+
+        @Test
+        void shouldReturnActiveGameInfoData() throws Exception {
+
+            when(standUseCase.execute(ID)).thenReturn(GAME_RESPONSE_DTO_OVER);
+
+            ResultActions result = mockMvc.perform(MockMvcRequestBuilders.post(API_URL + "/" + ID + "/stand")
+                    .contentType(MediaType.APPLICATION_JSON));
+
+            result.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(ID))
+                    .andExpect(jsonPath("$.createdAt").exists())
+                    .andExpect(jsonPath("$.lastTimePlayedAt").exists())
+                    .andExpect(jsonPath("$.username").value(NAME))
+                    .andExpect(jsonPath("$.playerTotalCardsValue").isNumber())
+                    .andExpect(jsonPath("$.playerHand", hasSize(2)))
+                    .andExpect(jsonPath("$.dealerFirstCard").exists())
+                    .andExpect(jsonPath("$.gameState").value(GAME_STATE_OVER))
+                    .andExpect(jsonPath("$.gameResult").exists())
+                    .andExpect(jsonPath("$.finishedWithBlackjack").exists())
+                    .andExpect(jsonPath("$.dealerFinalHand").exists());
+
+
+            verify(standUseCase, times(1)).execute(ID);
+        }
+
+        @DisplayName("should return 404 Game Not Found when the service throws a GameNotFoundException")
+        @Test
+        void shouldReturn404NotFound() throws Exception {
+
+            when(standUseCase.execute(ID)).thenThrow(new GameNotFoundException(ID));
+
+            ResultActions result = mockMvc.perform(MockMvcRequestBuilders.post(API_URL + "/" + ID + "/stand")
                     .contentType(MediaType.APPLICATION_JSON));
 
             result.andExpect(status().isNotFound())

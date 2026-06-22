@@ -8,7 +8,7 @@ import cat.itacademy.blackjack.demo.game.domain.value_object.Card;
 import java.util.List;
 
 
-public class PlayerLosingStrategy implements ShuffleStrategy {
+public class PlayerLosingByExceeding21Strategy implements ShuffleStrategy {
     private static final Suit CLUBS = Suit.CLUBS;
     private static final Suit HEARTS = Suit.HEARTS;
     private static final Suit DIAMONDS = Suit.DIAMONDS;
