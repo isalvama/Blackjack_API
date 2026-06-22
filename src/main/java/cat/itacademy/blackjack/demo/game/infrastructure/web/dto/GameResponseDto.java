@@ -14,6 +14,7 @@ String username,
 Integer playerTotalCardsValue,
 List<CardDto> playerHand,
 Card dealerFirstCard,
+Integer dealerTotalCardsValue,
 String gameState,
 String gameResult,
 Boolean finishedWithBlackjack
@@ -29,6 +30,7 @@ Boolean finishedWithBlackjack
                 game.getUserPlayer().getHandValue(),
                 game.getUserPlayer().getHand().getCards().stream().map(CardDto::from).toList(),
                 game.getDealer().getHand().getCards().getFirst(),
+                game.getDealer().getHandValue(),
                 game.getGameState().name(),
                 outcome != null ? game.getGameOutcome().result().name() : null,
                 outcome != null ? game.getGameOutcome().blackjack() : null

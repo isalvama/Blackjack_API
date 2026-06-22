@@ -15,11 +15,23 @@ public abstract class Player {
         this.hand = hand;
     }
 
-    void hit(Card card){
+    public void hit(Card card){
         if (card == null){
             throw new InvalidGameException("the card hit cannot be null");
         }
         this.hand.addCard(card);
+    }
+
+    boolean canChangeAceValue(){
+        return hand.valueIsGreaterThan21() && hand.hasAce();
+    }
+
+    boolean totalValueIsGreaterThan21(){
+        return this.hand.valueIsGreaterThan21();
+    }
+
+    void changeAceValueToOne(){
+        this.hand.changeAceValueToOne();
     }
 
     boolean checkBlackjack(){

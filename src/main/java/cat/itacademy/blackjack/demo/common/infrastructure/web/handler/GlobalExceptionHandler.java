@@ -2,6 +2,7 @@ package cat.itacademy.blackjack.demo.common.infrastructure.web.handler;
 
 import cat.itacademy.blackjack.demo.common.domain.exception.BlackjackException;
 import cat.itacademy.blackjack.demo.common.domain.exception.DomainException;
+import cat.itacademy.blackjack.demo.common.domain.exception.GameException;
 import cat.itacademy.blackjack.demo.game.domain.exception.GameNotFoundException;
 import cat.itacademy.blackjack.demo.game_statistics.application.exception.EntityConflictException;
 import jakarta.validation.ConstraintViolationException;
@@ -22,6 +23,15 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleGameNotFoundException(DomainException ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
         problemDetail.setTitle("Inexistence Error");
+        problemDetail.setDetail(ex.getMessage());
+        return problemDetail;
+    }
+
+    @ResponseBody
+    @ExceptionHandler(GameException.class)
+    public ProblemDetail handleGameException(GameException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.METHOD_NOT_ALLOWED);
+        problemDetail.setTitle("Business Rule Error");
         problemDetail.setDetail(ex.getMessage());
         return problemDetail;
     }

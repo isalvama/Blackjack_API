@@ -28,7 +28,7 @@ public class MongoGameRepository implements ActiveGamePort {
             gameDocument.setCreatedAt(LocalDateTime.now());
         }
         gameDocument.setLastTimePlayedAt(LocalDateTime.now());
-        GameDocument docCreated = mongoGameSpringDataRepository.insert(gameDocument);
+        GameDocument docCreated = mongoGameSpringDataRepository.save(gameDocument);
        return GameDocumentMapper.toModelEntity(docCreated);
     }
 
