@@ -41,8 +41,8 @@ class GetActiveGameServiceTest {
         UserPlayer userPlayer = UserPlayer.create(Name.of(name));
         Game game = Game.reconstitute(GAME_ID, GameState.STARTED, userPlayer, Dealer.create(), Deck.create(), LocalDateTime.now(), LocalDateTime.now());
         game.dealerHits();
-        game.playerHits();
-        game.playerHits();
+        game.hit();
+        game.hit();
 
         when(activeGamePort.getGame(GAME_ID)).thenReturn(Optional.of(game));
 
@@ -69,8 +69,8 @@ class GetActiveGameServiceTest {
 
         Exception exception = assertThrows(GameNotFoundException.class, () -> {getActiveGameService.execute(ID);});
 
-        assertTrue(exception.getMessage().contains("no"));
-        assertTrue(exception.getMessage().contains("game"));
+        assertTrue(exception.getMessage().contains("Game"));
+        assertTrue(exception.getMessage().contains("not"));
         assertTrue(exception.getMessage().contains("found"));
         assertTrue(exception.getMessage().contains(ID));
 

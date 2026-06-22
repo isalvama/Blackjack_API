@@ -2,6 +2,7 @@ package cat.itacademy.blackjack.demo.game.infrastructure.web;
 
 import cat.itacademy.blackjack.demo.game.application.port.in.CreateGameUseCase;
 import cat.itacademy.blackjack.demo.game.application.port.in.GetActiveGameUseCase;
+import cat.itacademy.blackjack.demo.game.application.port.in.HitUseCase;
 import cat.itacademy.blackjack.demo.game.domain.CardNumber;
 import cat.itacademy.blackjack.demo.game.domain.GameState;
 import cat.itacademy.blackjack.demo.game.domain.Suit;
@@ -18,7 +19,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -51,6 +51,7 @@ class GameRestControllerTest {
             21,
             List.of(new CardDto("ACE", "CLUBS"), new CardDto("JACK", "CLUBS")),
             new Card(CardNumber.EIGHT, Suit.DIAMONDS),
+            8,
             GAME_STATE_STARTED,
             null,
             null
@@ -67,6 +68,9 @@ class GameRestControllerTest {
     private CreateGameUseCase createGameUseCase;
 
     @MockitoBean
+    private HitUseCase hitUseCase;
+
+    @MockitoBean
     private GetActiveGameUseCase getActiveGameUseCase;
 
     @BeforeEach
@@ -76,7 +80,7 @@ class GameRestControllerTest {
 
     @Nested
     @DisplayName("PUT /api/blackjack")
-    class CreateFruit {
+    class CreateNewGame {
 
         @Test
         void shouldCreateNewGameSuccessfully() throws Exception {
@@ -137,7 +141,8 @@ class GameRestControllerTest {
     }
 
     @Nested
-    class getActiveGameState {
+    @DisplayName("GET /api/blackjack")
+    class GetActiveGameState {
 
         @Test
         void shouldReturn400ValidationErrorInvalidId() throws Exception {
@@ -179,16 +184,71 @@ class GameRestControllerTest {
         @Test
         void shouldReturn404NotFound() throws Exception {
 
-            when(getActiveGameUseCase.execute(ID)).thenThrow(new GameNotFoundException("no games found with id " + ID));
+            when(getActiveGameUseCase.execute(ID)).thenThrow(new GameNotFoundException(ID));
 
             ResultActions result = mockMvc.perform(MockMvcRequestBuilders.get(API_URL + "/" + ID)
                     .contentType(MediaType.APPLICATION_JSON));
 
             result.andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.detail", containsString("Game Not Found")))
-                    .andExpect(jsonPath("$.detail", containsString("games")))
+                    .andExpect(jsonPath("$.detail", containsString("Game")))
+                    .andExpect(jsonPath("$.detail", containsString("not")))
                     .andExpect(jsonPath("$.detail", containsString("found")))
-                    .andExpect(jsonPath("$.detail", containsString("id")))
+                    .andExpect(jsonPath("$.detail", containsString(ID)));
+        }
+    }
+    @Nested
+    @DisplayName("POST /api/blackjack/{id}/hit")
+    class Hit {
+
+        @Test
+        void shouldReturn400ValidationErrorInvalidId() throws Exception {
+            String invalidId = "invalid-id";
+
+            ResultActions result = mockMvc.perform(MockMvcRequestBuilders.post(API_URL + "/" + invalidId + "/hit")
+                    .contentType(MediaType.APPLICATION_JSON));
+
+            result.andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.title", Matchers.containsString("Validation Error in Parameter")));
+
+            verifyNoInteractions(createGameUseCase);
+        }
+
+        @Test
+        void shouldReturnActiveGameInfoData() throws Exception {
+
+            when(hitUseCase.execute(ID)).thenReturn(GAME_RESPONSE_DTO);
+
+            ResultActions result = mockMvc.perform(MockMvcRequestBuilders.post(API_URL + "/" + ID + "/hit")
+                    .contentType(MediaType.APPLICATION_JSON));
+
+            result.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(ID))
+                    .andExpect(jsonPath("$.createdAt").exists())
+                    .andExpect(jsonPath("$.lastTimePlayedAt").exists())
+                    .andExpect(jsonPath("$.username").value(NAME))
+                    .andExpect(jsonPath("$.playerTotalCardsValue").isNumber())
+                    .andExpect(jsonPath("$.playerHand", hasSize(2)))
+                    .andExpect(jsonPath("$.dealerFirstCard").exists())
+                    .andExpect(jsonPath("$.gameState").value(GAME_STATE_STARTED))
+                    .andExpect(jsonPath("$.gameResult", anyOf(is(nullValue()))))
+                    .andExpect(jsonPath("$.finishedWithBlackjack", anyOf(is(nullValue()))));
+
+            verify(hitUseCase, times(1)).execute(ID);
+        }
+
+        @DisplayName("should return 404 Game Not Found when the service throws a GameNotFoundException")
+        @Test
+        void shouldReturn404NotFound() throws Exception {
+
+            when(hitUseCase.execute(ID)).thenThrow(new GameNotFoundException(ID));
+
+            ResultActions result = mockMvc.perform(MockMvcRequestBuilders.post(API_URL + "/" + ID + "/hit")
+                    .contentType(MediaType.APPLICATION_JSON));
+
+            result.andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.detail", containsString("Game")))
+                    .andExpect(jsonPath("$.detail", containsString("not")))
+                    .andExpect(jsonPath("$.detail", containsString("found")))
                     .andExpect(jsonPath("$.detail", containsString(ID)));
         }
     }

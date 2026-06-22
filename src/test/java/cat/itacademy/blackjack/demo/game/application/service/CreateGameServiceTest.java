@@ -9,9 +9,7 @@ import cat.itacademy.blackjack.demo.game.domain.event.GameFinishedEventPublisher
 import cat.itacademy.blackjack.demo.game.domain.model.Game;
 import cat.itacademy.blackjack.demo.game.domain.value_object.Card;
 import cat.itacademy.blackjack.demo.game.infrastructure.web.dto.GameResponseDto;
-import cat.itacademy.blackjack.demo.shuffle_strategy.GameWithoutBlackJackStrategyConfig;
 import cat.itacademy.blackjack.demo.shuffle_strategy.TieWithBlackjackShuffleStrategy;
-import cat.itacademy.blackjack.demo.shuffle_strategy.UserWinningWithBlackjackStrategyConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -19,7 +17,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.annotation.Import;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -49,7 +46,6 @@ class CreateGameServiceTest {
     private final String PLAYER_NAME = "Name";
 
     @Nested
-    @Import(GameWithoutBlackJackStrategyConfig.class)
     class GameStartedWithoutBlackJack {
         @Test
         @DisplayName("Should save game and return DTO when game starts normally and is not over")
@@ -83,7 +79,6 @@ class CreateGameServiceTest {
     }
 
     @Nested
-    @Import(UserWinningWithBlackjackStrategyConfig.class)
     class GameFinishedUserWinningWithBlackJack {
         @Test
         @DisplayName("Should publish event when game is OVER (immediate Blackjack)")
