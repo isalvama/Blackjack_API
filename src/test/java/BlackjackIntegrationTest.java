@@ -554,4 +554,31 @@ public class BlackjackIntegrationTest {
             }
         }
     }
+    @Nested
+    @DisplayName("GET " + BASE_API)
+    class GetAllActiveGames {
+
+        @Test
+        void shouldReturn200WithListOfCreatedGames() throws Exception {
+            CreateGameDto createGameDto1 = new CreateGameDto(NAME);
+
+            mockMvc.perform(MockMvcRequestBuilders.post(BASE_API)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(createGameDto1)));
+
+            CreateGameDto createGameDto2 = new CreateGameDto("Another Name");
+
+            mockMvc.perform(MockMvcRequestBuilders.post(BASE_API)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(createGameDto2)));
+
+            ResultActions result = mockMvc.perform(MockMvcRequestBuilders.get(BASE_API)
+                    .contentType(MediaType.APPLICATION_JSON));
+
+            result.andExpect(status().isOk())
+                    .andExpect(jsonPath("$", hasSize(2)))
+                    .andExpect(jsonPath("$[0].id").exists())
+                    .andExpect(jsonPath("$[1].id").exists());
+        }
+    }
 }
