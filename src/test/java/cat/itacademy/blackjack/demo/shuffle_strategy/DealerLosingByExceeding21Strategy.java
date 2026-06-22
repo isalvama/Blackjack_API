@@ -1,13 +1,13 @@
 package cat.itacademy.blackjack.demo.shuffle_strategy;
 
-import cat.itacademy.blackjack.demo.game.application.service.shuffle_strategy.ShuffleStrategy;
-import cat.itacademy.blackjack.demo.game.domain.CardNumber;
-import cat.itacademy.blackjack.demo.game.domain.Suit;
-import cat.itacademy.blackjack.demo.game.domain.value_object.Card;
+import cat.itacademy.blackjack.demo.active_game.application.service.shuffle_strategy.ShuffleStrategy;
+import cat.itacademy.blackjack.demo.active_game.domain.CardNumber;
+import cat.itacademy.blackjack.demo.active_game.domain.Suit;
+import cat.itacademy.blackjack.demo.active_game.domain.value_object.Card;
 
 import java.util.List;
 
-import static cat.itacademy.blackjack.demo.game.domain.CardNumber.SIX;
+import static cat.itacademy.blackjack.demo.active_game.domain.CardNumber.SIX;
 
 public class DealerLosingByExceeding21Strategy implements ShuffleStrategy {
     private static final Suit CLUBS = Suit.CLUBS;

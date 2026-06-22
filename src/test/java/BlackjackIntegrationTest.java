@@ -1,8 +1,8 @@
 import cat.itacademy.blackjack.demo.BlackjackApplication;
 import cat.itacademy.blackjack.demo.common.domain.GameResult;
 import cat.itacademy.blackjack.demo.common.domain.value_object.GameId;
-import cat.itacademy.blackjack.demo.game.domain.GameState;
-import cat.itacademy.blackjack.demo.game.infrastructure.web.dto.CreateGameDto;
+import cat.itacademy.blackjack.demo.active_game.domain.GameState;
+import cat.itacademy.blackjack.demo.active_game.infrastructure.web.dto.CreateGameDto;
 import cat.itacademy.blackjack.demo.shuffle_strategy.*;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
@@ -50,7 +50,7 @@ public class BlackjackIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
-    private static final String BASE_API = "/api/blackjack";
+    private static final String BASE_API = "/api/active-games";
     private static final String NAME = "Test Name";
 
     @Autowired
