@@ -19,7 +19,7 @@ public class Deck {
         if (cards.isEmpty()) {
             throw new InvalidDeckException("cards list cannot be empty");
         }
-        this.cards = cards;
+        this.cards = new ArrayList<>(cards);
     }
 
     public void shuffle (ShuffleStrategy shuffleStrategy){

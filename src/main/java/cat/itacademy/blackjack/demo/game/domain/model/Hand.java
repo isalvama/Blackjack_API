@@ -2,7 +2,6 @@ package cat.itacademy.blackjack.demo.game.domain.model;
 import cat.itacademy.blackjack.demo.game.domain.CardNumber;
 import cat.itacademy.blackjack.demo.game.domain.exception.InvalidGameException;
 import cat.itacademy.blackjack.demo.game.domain.exception.InvalidHandException;
-import cat.itacademy.blackjack.demo.game.domain.exception.InvalidPlayerException;
 import cat.itacademy.blackjack.demo.game.domain.value_object.Card;
 import lombok.Getter;
 
@@ -21,13 +20,13 @@ public class Hand {
         if (totalValue == null){
             throw new InvalidHandException("total value cannot be null");
         }
-        this.cards = cards;
+        this.cards = new ArrayList<>(cards);
         this.totalValue = totalValue;
     }
 
     public static Hand create (){
         return new Hand(
-                new ArrayList<Card>(),
+                new ArrayList<>(),
                 0
         );
     }
@@ -56,14 +55,26 @@ public class Hand {
             return false;
         }
         List<Card> firstTwoCards = this.getCards().subList(0, 2);
-        boolean hasAce = firstTwoCards.stream().anyMatch(c -> c.cardNumber().equals(CardNumber.ACE));
         boolean hasJack = firstTwoCards.stream().anyMatch(c -> c.cardNumber().equals(CardNumber.JACK)
                 || c.cardNumber().equals(CardNumber.KING) || c.cardNumber().equals(CardNumber.QUEEN));
-        return hasAce && hasJack;
+        return hasAce() && hasJack;
     }
 
     boolean isEmpty(){
         return this.cards.isEmpty();
+    }
+
+    boolean hasAce (){
+        return cards.stream().anyMatch(c -> c.cardNumber().equals(CardNumber.ACE));
+    }
+
+    boolean valueIsGreaterThan21(){
+        return this.totalValue > 21;
+    }
+
+    void changeAceValueToOne () {
+       long numberOfAce = cards.stream().filter(c -> c.cardNumber().equals(CardNumber.ACE)).count();
+       this.totalValue -= Math.toIntExact(numberOfAce * 10);
     }
 
     public List<Card> getCards() {
