@@ -38,6 +38,10 @@ public abstract class Player {
         return this.hand.isBlackjack();
     }
 
+    void setCardsValueToTwentyOne(){
+        this.hand.setCardsValueToTwentyOne();
+    }
+
     public Hand getHand() {
         return this.hand;
     }

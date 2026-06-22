@@ -76,16 +76,11 @@ public class Game {
         playerHits();
         playerHits();
         if (this.userPlayer.checkBlackjack()){
+            this.userPlayer.setCardsValueToTwentyOne();
             dealerTurn();
             setFinalGameResult(determineBlackjackWinner(), true);
             }
         }
-
-    public void dealerTurn(){
-        while (!this.dealer.shouldStand()){
-            dealerHits();
-        }
-    }
 
     public void dealerHits () {
         ensureGameIsActiveAndDeckHasCards();
@@ -98,15 +93,39 @@ public class Game {
         if (this.userPlayer.canChangeAceValue()){
             this.userPlayer.changeAceValueToOne();
         }
-        if(this.userPlayer.totalValueIsGreaterThan21()){
+        if (this.userPlayer.totalValueIsGreaterThan21()){
             setFinalGameResult(GameResult.DEALER_WIN, false);
         }
+    }
+
+    public void stand (){
+        dealerTurn();
+        if (this.dealer.checkBlackjack()){
+            this.dealer.setCardsValueToTwentyOne();
+            setFinalGameResult(GameResult.DEALER_WIN, true);
+            return;
+        }
+        if (this.dealer.canChangeAceValue()){
+            this.dealer.changeAceValueToOne();
+            return;
+        }
+        if (this.dealer.totalValueIsGreaterThan21()){
+            setFinalGameResult(GameResult.USER_WIN, false);
+            return;
+        }
+        setFinalGameResult(determineWinner(), false);
     }
 
     private void playerHits (){
         ensureGameIsActiveAndDeckHasCards();
         Card card = this.deck.draw();
         this.userPlayer.hit(card);
+    }
+
+    private void dealerTurn(){
+        while (!this.dealer.shouldStand()){
+            dealerHits();
+        }
     }
 
     private void ensureGameIsActiveAndDeckHasCards(){
@@ -140,9 +159,11 @@ public class Game {
         }
     }
 
+
+
     private GameResult determineWinner(){
         int playerHandValue = this.userPlayer.getHandValue();
-        int dealerHandValue = this.userPlayer.getHandValue();
+        int dealerHandValue = this.dealer.getHandValue();
         if (playerHandValue > dealerHandValue){
             return GameResult.USER_WIN;
         }
