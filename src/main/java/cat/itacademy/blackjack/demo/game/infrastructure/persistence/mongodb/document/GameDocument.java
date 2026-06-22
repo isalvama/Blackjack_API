@@ -28,17 +28,21 @@ public class GameDocument {
         }
 
         public GameDocument(String id,
+                            LocalDateTime lastTimePlayedAt,
                             String userName,
                             PlayerDocument userPlayerInfo,
                             PlayerDocument dealerInfo,
                             String gameState,
-                            List<CardDocument> deck
+                            List<CardDocument> deck,
+                            LocalDateTime createdAt
         ) {
             this.id = id;
+            this.lastTimePlayedAt = lastTimePlayedAt;
             this.userName = userName;
             this.userPlayerInfo = userPlayerInfo;
             this.dealerInfo = dealerInfo;
             this.gameState = gameState;
             this.deck = deck;
+            this.createdAt = createdAt;
         }
 }

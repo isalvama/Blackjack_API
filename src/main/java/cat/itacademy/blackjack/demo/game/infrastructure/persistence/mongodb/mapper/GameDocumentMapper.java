@@ -30,11 +30,13 @@ public class GameDocumentMapper {
 public static GameDocument toDocument(Game entity) {
         return new GameDocument(
                 entity.getId().toString(),
+                entity.getLastTimePlayedAt(),
                 entity.getUserPlayer().getName().name(),
                 PlayerDocumentMapper.toDocument(entity.getUserPlayer()),
                 PlayerDocumentMapper.toDocument(entity.getDealer()),
                 entity.getGameState().name(),
-                entity.getDeck().getCards().stream().map(CardDocumentMapper::toDocument).toList()
+                entity.getDeck().getCards().stream().map(CardDocumentMapper::toDocument).toList(),
+                entity.getCreatedAt()
         );
     }
 }

@@ -44,7 +44,7 @@ class GetActiveGameServiceTest {
         game.hit();
         game.hit();
 
-        when(activeGamePort.getGame(GAME_ID)).thenReturn(Optional.of(game));
+        when(activeGamePort.getActiveGame(GAME_ID)).thenReturn(Optional.of(game));
 
         GameResponseDto gameResponseDto = getActiveGameService.execute(ID);
 
@@ -59,13 +59,13 @@ class GetActiveGameServiceTest {
         assertNull(gameResponseDto.gameResult());
         assertNull(gameResponseDto.finishedWithBlackjack());
 
-        verify(activeGamePort, times(1)).getGame(GAME_ID);
+        verify(activeGamePort, times(1)).getActiveGame(GAME_ID);
     }
 
     @Test
     void shouldThrowGameNotFoundExceptionWhenPortReturnEmptyOptional () {
 
-        when(activeGamePort.getGame(GAME_ID)).thenReturn(Optional.empty());
+        when(activeGamePort.getActiveGame(GAME_ID)).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(GameNotFoundException.class, () -> {getActiveGameService.execute(ID);});
 
@@ -75,6 +75,6 @@ class GetActiveGameServiceTest {
         assertTrue(exception.getMessage().contains(ID));
 
 
-        verify(activeGamePort, times(1)).getGame(GAME_ID);
+        verify(activeGamePort, times(1)).getActiveGame(GAME_ID);
     }
 }

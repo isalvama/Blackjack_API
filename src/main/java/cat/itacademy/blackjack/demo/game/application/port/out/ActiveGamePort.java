@@ -6,6 +6,9 @@ import cat.itacademy.blackjack.demo.game.domain.model.Game;
 import java.util.Optional;
 
 public interface ActiveGamePort {
-    Game saveGame(Game game);
-    Optional<Game> getGame(GameId id);
+    Game saveActiveGame(Game game);
+
+    Optional<Game> getActiveGame(GameId id);
+
+    void deleteActiveGame(GameId id);
 }

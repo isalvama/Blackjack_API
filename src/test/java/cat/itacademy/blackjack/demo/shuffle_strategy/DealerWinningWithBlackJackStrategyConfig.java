@@ -6,11 +6,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
 @TestConfiguration
-public class PlayerLosingStrategyConfig {
+public class DealerWinningWithBlackJackStrategyConfig {
     @Bean
     @Primary
-    public ShuffleStrategy playerLosingStrategy(){
-        return new PlayerLosingStrategy();
+    public ShuffleStrategy dealerWinningWithBlackJackStrategy(){
+        return new DealerWinningWithBlackJackStrategy();
     }
 }
 

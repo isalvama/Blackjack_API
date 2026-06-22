@@ -8,8 +8,6 @@ import cat.itacademy.blackjack.demo.game.infrastructure.persistence.mongodb.docu
 import cat.itacademy.blackjack.demo.game.infrastructure.persistence.mongodb.mapper.GameDocumentMapper;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
-
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Profile("mongodb")
@@ -22,19 +20,20 @@ public class MongoGameRepository implements ActiveGamePort {
     }
 
     @Override
-    public Game saveGame(Game game) {
+    public Game saveActiveGame(Game game) {
         GameDocument gameDocument = GameDocumentMapper.toDocument(game);
-        if (gameDocument.getCreatedAt() == null){
-            gameDocument.setCreatedAt(LocalDateTime.now());
-        }
-        gameDocument.setLastTimePlayedAt(LocalDateTime.now());
         GameDocument docCreated = mongoGameSpringDataRepository.save(gameDocument);
        return GameDocumentMapper.toModelEntity(docCreated);
     }
 
     @Override
-    public Optional<Game> getGame(GameId id) {
+    public Optional<Game> getActiveGame(GameId id) {
         return mongoGameSpringDataRepository.findById(id.toString())
                 .map(GameDocumentMapper::toModelEntity);
+    }
+
+    @Override
+    public void deleteActiveGame(GameId id) {
+        mongoGameSpringDataRepository.deleteById(id.toString());
     }
 }

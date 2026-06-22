@@ -3,6 +3,7 @@ package cat.itacademy.blackjack.demo.game.infrastructure.web;
 import cat.itacademy.blackjack.demo.game.application.port.in.CreateGameUseCase;
 import cat.itacademy.blackjack.demo.game.application.port.in.GetActiveGameUseCase;
 import cat.itacademy.blackjack.demo.game.application.port.in.HitUseCase;
+import cat.itacademy.blackjack.demo.game.application.port.in.StandUseCase;
 import cat.itacademy.blackjack.demo.game.infrastructure.web.dto.CreateGameDto;
 import cat.itacademy.blackjack.demo.game.infrastructure.web.dto.GameResponseDto;
 import jakarta.validation.Valid;
@@ -38,6 +39,8 @@ public class GameRestController {
     private final CreateGameUseCase createGameUseCase;
     private final GetActiveGameUseCase getActiveGameUseCase;
     private final HitUseCase hitUseCase;
+    private final StandUseCase standUseCase;
+
 
     /**
      * Creates a new game.
@@ -72,6 +75,12 @@ public class GameRestController {
     @PostMapping("{id}/hit")
     public ResponseEntity<GameResponseDto> hit(@PathVariable @UUID String id) {
         GameResponseDto gameResponse = hitUseCase.execute(id);
+        return ResponseEntity.ok(gameResponse);
+    }
+
+    @PostMapping("{id}/stand")
+    public ResponseEntity<GameResponseDto> stand(@PathVariable @UUID String id) {
+        GameResponseDto gameResponse = standUseCase.execute(id);
         return ResponseEntity.ok(gameResponse);
     }
 }

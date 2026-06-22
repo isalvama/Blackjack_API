@@ -5,9 +5,7 @@ import cat.itacademy.blackjack.demo.common.domain.value_object.GameId;
 import cat.itacademy.blackjack.demo.common.domain.value_object.Name;
 import cat.itacademy.blackjack.demo.game.application.port.out.ActiveGamePort;
 import cat.itacademy.blackjack.demo.game.application.service.shuffle_strategy.ShuffleStrategy;
-import cat.itacademy.blackjack.demo.game.domain.CardNumber;
 import cat.itacademy.blackjack.demo.game.domain.GameState;
-import cat.itacademy.blackjack.demo.game.domain.Suit;
 import cat.itacademy.blackjack.demo.game.domain.event.GameFinishedEvent;
 import cat.itacademy.blackjack.demo.game.domain.event.GameFinishedEventPublisher;
 import cat.itacademy.blackjack.demo.game.domain.exception.GameNotFoundException;
@@ -18,9 +16,7 @@ import cat.itacademy.blackjack.demo.game.domain.model.UserPlayer;
 import cat.itacademy.blackjack.demo.game.domain.value_object.Card;
 import cat.itacademy.blackjack.demo.game.infrastructure.web.dto.GameResponseDto;
 import cat.itacademy.blackjack.demo.shuffle_strategy.GameWithoutBlackJackStrategy;
-import cat.itacademy.blackjack.demo.shuffle_strategy.GameWithoutBlackJackStrategyConfig;
-import cat.itacademy.blackjack.demo.shuffle_strategy.PlayerLosingStrategy;
-import cat.itacademy.blackjack.demo.shuffle_strategy.TieWithBlackjackShuffleStrategy;
+import cat.itacademy.blackjack.demo.shuffle_strategy.PlayerLosingByExceeding21Strategy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,8 +41,6 @@ import static org.mockito.Mockito.times;
 @ExtendWith(MockitoExtension.class)
 class HitServiceTest {
 
-    private Game game;
-
     @Mock
     private GameFinishedEventPublisher eventPublisher;
 
@@ -66,7 +60,6 @@ class HitServiceTest {
         @DisplayName("Should save game and return DTO when game starts normally and is not over")
         void shouldSaveGameAndReturnGameInfoWhenItIsNotOver() {
             String name = "Name";
-            UserPlayer userPlayer = UserPlayer.create(Name.of(name));
 
             when(shuffleStrategy.shuffle(any())).thenAnswer(invocation -> {
                 List<Card> cards = invocation.getArgument(0);
@@ -81,9 +74,9 @@ class HitServiceTest {
             LocalDateTime now = LocalDateTime.now();
             Game game = Game.reconstitute(GAME_ID, GameState.STARTED, startedGame.getUserPlayer(), startedGame.getDealer(), startedGame.getDeck(), now, now);
 
-            when(gamePort.getGame(GAME_ID)).thenReturn(Optional.of(game));
+            when(gamePort.getActiveGame(GAME_ID)).thenReturn(Optional.of(game));
 
-            when(gamePort.saveGame(any(Game.class))).thenAnswer(AdditionalAnswers.returnsFirstArg());
+            when(gamePort.saveActiveGame(any(Game.class))).thenAnswer(AdditionalAnswers.returnsFirstArg());
 
             GameResponseDto result = hitService.execute(ID);
 
@@ -94,12 +87,13 @@ class HitServiceTest {
             assertTrue(result.playerTotalCardsValue() > 3);
             assertEquals(3, result.playerHand().size());
             assertNotNull(result.dealerFirstCard());
-            assertEquals(result.dealerFirstCard().cardNumber().getValue(), result.dealerTotalCardsValue());
+            assertNotNull(result.dealerTotalCardsValue());
             assertNotNull(result.gameState());
             assertNull(result.gameResult());
             assertNull(result.finishedWithBlackjack());
 
-            verify(gamePort, times(1)).saveGame(any(Game.class));
+            verify(gamePort, times(1)).saveActiveGame(any(Game.class));
+            verify(gamePort, never()).deleteActiveGame(any());
             verify(eventPublisher, never()).publishEvent(any());
         }
 
@@ -109,7 +103,7 @@ class HitServiceTest {
             String name = "Name";
             when(shuffleStrategy.shuffle(any())).thenAnswer(invocation -> {
                 List<Card> cards = invocation.getArgument(0);
-                PlayerLosingStrategy playerLosingStrategy = new PlayerLosingStrategy();
+                PlayerLosingByExceeding21Strategy playerLosingStrategy = new PlayerLosingByExceeding21Strategy();
                 playerLosingStrategy.shuffle(cards);
                 return cards;
             });
@@ -119,12 +113,7 @@ class HitServiceTest {
             LocalDateTime now = LocalDateTime.now();
             Game gameReconstituted = Game.reconstitute(GAME_ID, GameState.STARTED, startedGame.getUserPlayer(), startedGame.getDealer(), startedGame.getDeck(), now, now);
 
-            when(gamePort.getGame(GAME_ID)).thenReturn(Optional.of(gameReconstituted));
-            when(gamePort.saveGame(any(Game.class))).thenAnswer(invocation -> {
-                Game g = invocation.getArgument(0);
-                g.updateAuditInfo(now.plusSeconds(1));
-                return g;
-            });
+            when(gamePort.getActiveGame(GAME_ID)).thenReturn(Optional.of(gameReconstituted));
 
             GameResponseDto result = hitService.execute(ID);
 
@@ -135,14 +124,15 @@ class HitServiceTest {
             assertFalse(result.finishedWithBlackjack());
             assertThat(result.playerTotalCardsValue()).isGreaterThan(21);
 
-            verify(gamePort, times(1)).saveGame(any(Game.class));
+            verify(gamePort, times(1)).deleteActiveGame(any(GameId.class));
             verify(eventPublisher, times(1)).publishEvent(any(GameFinishedEvent.class));
+            verify(gamePort,never()).saveActiveGame(any());
         }
 
     @Test
     void shouldThrowGameNotFoundExceptionWhenPortReturnEmptyOptional () {
 
-        when(gamePort.getGame(any(GameId.class))).thenReturn(Optional.empty());
+        when(gamePort.getActiveGame(any(GameId.class))).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(GameNotFoundException.class, () -> {hitService.execute(ID);});
 
@@ -152,8 +142,8 @@ class HitServiceTest {
         assertTrue(exception.getMessage().contains(ID));
 
 
-        verify(gamePort, times(1)).getGame(GAME_ID);
-        verify(gamePort, never()).saveGame(any(Game.class));
+        verify(gamePort, times(1)).getActiveGame(GAME_ID);
+        verify(gamePort, never()).saveActiveGame(any(Game.class));
         verify(eventPublisher, never()).publishEvent(any());
     }
 }

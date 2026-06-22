@@ -60,6 +60,10 @@ public class Hand {
         return hasAce() && hasJack;
     }
 
+    void setCardsValueToTwentyOne(){
+        this.totalValue = 21;
+    }
+
     boolean isEmpty(){
         return this.cards.isEmpty();
     }
