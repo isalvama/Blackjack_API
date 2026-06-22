@@ -63,6 +63,10 @@ public class Game {
         this.lastTimePlayedAt = validateNotNull(lastTimePlayedAt, "lastTimePlayedAt cannot be null");
     }
 
+    public void updateAuditInfo(LocalDateTime lastTimePlayedAt){
+        this.lastTimePlayedAt = validateNotNull(lastTimePlayedAt, "lastTimePlayedAt cannot be null");
+    }
+
     public void start (ShuffleStrategy shuffleStrategy){
         if (gameState != GameState.STARTED){
             throw new GameException("the Game cannot start over because it has already started");
@@ -84,28 +88,34 @@ public class Game {
     }
 
     public void dealerHits () {
-        ensureGameIsActive();
-        Card card = drawDeck();
+        ensureGameIsActiveAndDeckHasCards();
+        Card card = this.deck.draw();
         this.dealer.hit(card);
     }
 
-    public void playerHits (){
-        ensureGameIsActive();
-        Card card = drawDeck();
+    public void hit (){
+        playerHits();
+        if (this.userPlayer.canChangeAceValue()){
+            this.userPlayer.changeAceValueToOne();
+        }
+        if(this.userPlayer.totalValueIsGreaterThan21()){
+            setFinalGameResult(GameResult.DEALER_WIN, false);
+        }
+    }
+
+    private void playerHits (){
+        ensureGameIsActiveAndDeckHasCards();
+        Card card = this.deck.draw();
         this.userPlayer.hit(card);
     }
 
-    private void ensureGameIsActive(){
+    private void ensureGameIsActiveAndDeckHasCards(){
         if (gameState == GameState.OVER){
             throw new InvalidHitException("the player cannot hit a new card because the game is already over");
         }
-    }
-
-    private Card drawDeck(){
-        if (this.deck.hasNoCards()){
+        if (this.deck.hasNoCards()) {
             setFinalGameResult(determineWinner(), false);
         }
-        return this.deck.draw();
     }
 
     private void setFinalGameResult(GameResult gameResult, boolean finishedWithBlackJack){
