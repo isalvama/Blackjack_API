@@ -8,6 +8,8 @@ import cat.itacademy.blackjack.demo.game.infrastructure.persistence.mongodb.docu
 import cat.itacademy.blackjack.demo.game.infrastructure.persistence.mongodb.mapper.GameDocumentMapper;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 import java.util.Optional;
 
 @Profile("mongodb")
@@ -30,6 +32,15 @@ public class MongoGameRepository implements ActiveGamePort {
     public Optional<Game> getActiveGame(GameId id) {
         return mongoGameSpringDataRepository.findById(id.toString())
                 .map(GameDocumentMapper::toModelEntity);
+    }
+
+    @Override
+    public List<Game> getAllActiveGames() {
+        List<GameDocument> gameDocuments = mongoGameSpringDataRepository.findAll();
+        if (!gameDocuments.isEmpty()){
+           return gameDocuments.stream().map(GameDocumentMapper::toModelEntity).toList();
+        }
+        return List.of();
     }
 
     @Override

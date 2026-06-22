@@ -1,9 +1,6 @@
 package cat.itacademy.blackjack.demo.game.infrastructure.web;
 
-import cat.itacademy.blackjack.demo.game.application.port.in.CreateGameUseCase;
-import cat.itacademy.blackjack.demo.game.application.port.in.GetActiveGameUseCase;
-import cat.itacademy.blackjack.demo.game.application.port.in.HitUseCase;
-import cat.itacademy.blackjack.demo.game.application.port.in.StandUseCase;
+import cat.itacademy.blackjack.demo.game.application.port.in.*;
 import cat.itacademy.blackjack.demo.game.infrastructure.web.dto.CreateGameDto;
 import cat.itacademy.blackjack.demo.game.infrastructure.web.dto.GameResponseDto;
 import jakarta.validation.Valid;
@@ -15,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 /**
  * GameRestController exposes game management operations as REST endpoints.
@@ -38,6 +36,7 @@ import java.net.URI;
 public class GameRestController {
     private final CreateGameUseCase createGameUseCase;
     private final GetActiveGameUseCase getActiveGameUseCase;
+    private final GetAllActiveGamesUseCase getAllActiveGamesUseCase;
     private final HitUseCase hitUseCase;
     private final StandUseCase standUseCase;
 
@@ -70,6 +69,12 @@ public class GameRestController {
     public ResponseEntity<GameResponseDto> getActiveGameState(@PathVariable @UUID String id) {
         GameResponseDto gameResponse = getActiveGameUseCase.execute(id);
         return ResponseEntity.ok(gameResponse);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<GameResponseDto>> getAllActiveGames() {
+        List<GameResponseDto> gameResponses = getAllActiveGamesUseCase.execute();
+        return ResponseEntity.ok(gameResponses);
     }
 
     @PostMapping("{id}/hit")
