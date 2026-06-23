@@ -9,6 +9,7 @@ import cat.itacademy.blackjack.demo.finished_game.infrastructure.persistence.jpa
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -32,5 +33,17 @@ public class JpaFinishedGameRepository implements FinishedGamePort {
     @Override
     public Integer countGames() {
         return Math.toIntExact(jpaGameSpringDataRepository.count());
+    }
+
+    @Override
+    public List<FinishedGame> getAllOrderedByFinishedAtDesc(){
+        List<JpaFinishedGameEntity> finishedGames = jpaGameSpringDataRepository.findAllOrderedByFinishedAtDesc();
+        return finishedGames.stream().map(finishedGameMapper::toDomain).toList();
+    }
+
+    @Override
+    public List<FinishedGame> getAllOrderedByScoreDesc(){
+        List<JpaFinishedGameEntity> finishedGames = jpaGameSpringDataRepository.findAllOrderedByFinishedAtDesc();
+        return finishedGames.stream().map(finishedGameMapper::toDomain).toList();
     }
 }
