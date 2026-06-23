@@ -14,7 +14,6 @@ public class PlayerProfile {
     private Long score;
 
     private PlayerProfile(Name name, Long numberOfGamesPlayed, Long numberOfGamesWon, Long score) {
-
         this.name = validateNotNull(name, "name cannot be null");
         this.numberOfGamesPlayed = validateNonNullPositiveLong(numberOfGamesPlayed, "numberOfGamesPlayed");
         this.numberOfGamesWon = validateNonNullPositiveLong(numberOfGamesWon, "numberOfGamesWon");
@@ -41,22 +40,10 @@ public class PlayerProfile {
         return playerProfile;
     }
 
-    public void updateProfileWithNewGame(String gameResult, Long totalCardsValue, Boolean finishedWithBlackJack){
+    public void updateProfileWithNewGame(Integer score){
         this.numberOfGamesWon++;
         this.numberOfGamesPlayed++;
-
-        if (gameResult.equalsIgnoreCase(GameResult.USER_WIN.name()) && finishedWithBlackJack){
-            this.score += 21;
-        }
-        if (gameResult.equalsIgnoreCase(GameResult.USER_WIN.name()) && !finishedWithBlackJack){
-            this.score += totalCardsValue;
-        }
-        if (gameResult.equalsIgnoreCase(GameResult.TIE.name()) && finishedWithBlackJack){
-            this.score += 11;
-        }
-        if (gameResult.equalsIgnoreCase(GameResult.TIE.name()) && !finishedWithBlackJack){
-            this.score += totalCardsValue/2;
-        }
+        this.score += score;
     }
 
     private static <T> T validateNotNull(T obj, String message) {
