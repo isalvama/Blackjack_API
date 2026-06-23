@@ -3,7 +3,6 @@ package cat.itacademy.blackjack.demo.finished_game.infrastructure.persistence.jp
 import cat.itacademy.blackjack.demo.common.domain.GameResult;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -16,7 +15,6 @@ import java.util.UUID;
 @Entity
 @Table(name = "finished_game")
 @Getter
-@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class JpaFinishedGameEntity {
@@ -29,7 +27,7 @@ public class JpaFinishedGameEntity {
     @JdbcTypeCode(SqlTypes.BINARY)
     private UUID gameId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "player_id", updatable = false)
     private JpaPlayerProfileEntity player;
 
@@ -51,6 +49,9 @@ public class JpaFinishedGameEntity {
 
     @Column(name = "finished_with_blackjack", updatable = false)
     private Boolean finishedWithBlackjack;
+
+    @Column(updatable = false)
+    private Integer score;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
