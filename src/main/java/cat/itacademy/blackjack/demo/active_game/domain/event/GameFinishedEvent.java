@@ -15,7 +15,7 @@ public record GameFinishedEvent(
         String gameResult,
         Boolean finishedWithBlackjack,
         LocalDateTime createdAt
-        ) {
+) {
 
     public static GameFinishedEvent from (Game game){
         return new GameFinishedEvent(

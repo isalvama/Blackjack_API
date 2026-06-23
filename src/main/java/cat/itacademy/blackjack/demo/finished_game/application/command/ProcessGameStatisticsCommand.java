@@ -9,14 +9,14 @@ import java.util.UUID;
 @Builder
 public record ProcessGameStatisticsCommand(
         UUID gameId,
-        String userPlayerName,
-        Integer playerName,
-        Integer numberOfRequestedCardsByDealer,
-        Integer totalCardsValueUser,
+        String playerName,
+        Integer playerNumberOfCards,
+        Integer dealerNumberOfCards,
+        Integer totalCardsValuePlayer,
         Integer totalCardsValueDealer,
-        LocalDateTime createdAt,
         String gameResult,
-        Boolean finishedWithBlackjack
+        Boolean finishedWithBlackjack,
+        LocalDateTime createdAt
 ) {
 
     public static ProcessGameStatisticsCommand fromGameFinishedEvent (GameFinishedEvent event){
@@ -27,9 +27,9 @@ public record ProcessGameStatisticsCommand(
                 event.dealerNumberOfCards(),
                 event.totalCardsValuePlayer(),
                 event.totalCardsValueDealer(),
-                event.createdAt(),
                 event.gameResult(),
-                event.finishedWithBlackjack()
-        );
+                event.finishedWithBlackjack(),
+                event.createdAt()
+                );
     }
 }
