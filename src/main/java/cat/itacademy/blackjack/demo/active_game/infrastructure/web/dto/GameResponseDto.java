@@ -37,4 +37,12 @@ List<CardDto> dealerFinalHand
                 outcome != null ? game.getDealer().getHand().getCards().stream().map(CardDto::from).toList() : null
         );
     }
-}
+
+    public static List<GameResponseDto> from (List<Game> games){
+        if (games == null || games.isEmpty()){
+            return List.of();
+        }
+        return games.stream().map(GameResponseDto::from).toList();
+    }
+
+    }

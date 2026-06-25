@@ -4,8 +4,8 @@ import cat.itacademy.blackjack.demo.finished_game.infrastructure.web.FinishedGam
 
 import java.util.List;
 
-public interface GetAllFinishedGamesSortedUseCase {
-    List<FinishedGameResponseDto> getAllOrderedByFinishedAtDesc();
-    List<FinishedGameResponseDto> getAllOrderedByScoreDesc();
+public interface GetFinishedGamesFilteredUseCase {
 
+    List<FinishedGameResponseDto> getAllByPlayerId(Long playerId);
+    List<FinishedGameResponseDto> getAllByPlayerName(String name);
 }

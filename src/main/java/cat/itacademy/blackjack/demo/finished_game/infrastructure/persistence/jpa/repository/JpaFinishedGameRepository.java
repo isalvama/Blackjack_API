@@ -2,11 +2,13 @@ package cat.itacademy.blackjack.demo.finished_game.infrastructure.persistence.jp
 
 import cat.itacademy.blackjack.demo.common.domain.value_object.GameId;
 import cat.itacademy.blackjack.demo.finished_game.application.port.out.FinishedGamePort;
+import cat.itacademy.blackjack.demo.finished_game.domain.criteria.FinishedGameSortCriteria;
 import cat.itacademy.blackjack.demo.finished_game.domain.model.FinishedGame;
 import cat.itacademy.blackjack.demo.finished_game.infrastructure.persistence.jpa.entity.JpaFinishedGameEntity;
 import cat.itacademy.blackjack.demo.finished_game.infrastructure.persistence.jpa.mapper.FinishedGameMapper;
 import cat.itacademy.blackjack.demo.finished_game.infrastructure.persistence.jpa.springDataRepository.JpaFinishedGameSpringDataRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -36,14 +38,17 @@ public class JpaFinishedGameRepository implements FinishedGamePort {
     }
 
     @Override
-    public List<FinishedGame> getAllOrderedByFinishedAtDesc(){
-        List<JpaFinishedGameEntity> finishedGames = jpaGameSpringDataRepository.findAllOrderedByFinishedAtDesc();
-        return finishedGames.stream().map(finishedGameMapper::toDomain).toList();
-    }
+    public List<FinishedGame> getByCriteria(FinishedGameSortCriteria criteria) {
+        Sort sort = Sort.by(
+                Sort.Direction.valueOf(criteria.sortType().getOrderType().name()),
+                criteria.sortType().getEntityProperty()
+        );
 
-    @Override
-    public List<FinishedGame> getAllOrderedByScoreDesc(){
-        List<JpaFinishedGameEntity> finishedGames = jpaGameSpringDataRepository.findAllOrderedByFinishedAtDesc();
-        return finishedGames.stream().map(finishedGameMapper::toDomain).toList();
+        List<JpaFinishedGameEntity> entities = criteria.playerId().map(p -> jpaGameSpringDataRepository.findByPlayerId(p, sort))
+                .or(() -> criteria.playerName().map(p -> jpaGameSpringDataRepository.findByPlayerName(p, sort)))
+                .orElseGet(() -> jpaGameSpringDataRepository.findAllWithPlayer(sort));
+
+        return finishedGameMapper.toDomain(entities);
+
     }
 }

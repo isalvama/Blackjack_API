@@ -8,10 +8,12 @@ import cat.itacademy.blackjack.demo.finished_game.infrastructure.persistence.jpa
 import cat.itacademy.blackjack.demo.finished_game.infrastructure.persistence.jpa.entity.JpaPlayerProfileEntity;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class FinishedGameMapper {
 
-    public JpaFinishedGameEntity toEntity(FinishedGame finishedGame){
+    public JpaFinishedGameEntity toEntity(FinishedGame finishedGame) {
 
         JpaPlayerProfileEntity playerProxy = new JpaPlayerProfileEntity();
         playerProxy.setId(finishedGame.getPlayerId());
@@ -28,10 +30,10 @@ public class FinishedGameMapper {
                 finishedGame.getScore(),
                 finishedGame.getCreatedAt(),
                 finishedGame.getFinishedAt()
-                );
+        );
     }
 
-    public FinishedGame toDomain (JpaFinishedGameEntity finishedGameEntity){
+    public FinishedGame toDomain(JpaFinishedGameEntity finishedGameEntity) {
         return FinishedGame.reconstitute(
                 finishedGameEntity.getId(),
                 GameId.fromUUID(finishedGameEntity.getGameId()),
@@ -45,5 +47,9 @@ public class FinishedGameMapper {
                 finishedGameEntity.getFinishedAt(),
                 finishedGameEntity.getScore()
         );
+    }
+
+    public List<FinishedGame> toDomain(List<JpaFinishedGameEntity> finishedGameEntities) {
+        return finishedGameEntities.stream().map(this::toDomain).toList();
     }
 }
