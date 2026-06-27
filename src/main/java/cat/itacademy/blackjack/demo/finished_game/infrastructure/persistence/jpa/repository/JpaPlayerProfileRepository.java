@@ -39,7 +39,7 @@ public class JpaPlayerProfileRepository implements PlayerProfilePort {
     }
 
     @Override
-    public List<PlayerProfile> getByCriteria(PlayerProfileSortType sortType) {
+    public List<PlayerProfile> findAllSorted(PlayerProfileSortType sortType) {
         Sort sort = Sort.by(
                 Sort.Direction.valueOf(sortType.getEntityProperty()),
                 sortType.getEntityProperty()

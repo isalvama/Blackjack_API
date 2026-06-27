@@ -11,7 +11,7 @@ public interface PlayerProfilePort {
 
     PlayerProfile save(PlayerProfile playerProfile);
 
-    List<PlayerProfile> getByCriteria(PlayerProfileSortType sort);
+    List<PlayerProfile> findAllSorted(PlayerProfileSortType sort);
 
     Optional<PlayerProfile> findById(Long id);
 }

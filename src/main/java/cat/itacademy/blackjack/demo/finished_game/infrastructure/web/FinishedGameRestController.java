@@ -61,7 +61,4 @@ public class FinishedGameRestController {
     ) {
         return ResponseEntity.ok(getPlayerProfilesUseCase.execute(sort));
     }
-
-
-
 }
