@@ -6,6 +6,8 @@ import cat.itacademy.blackjack.demo.finished_game.infrastructure.persistence.jpa
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
 public class PlayerProfileMapper {
@@ -28,5 +30,9 @@ public class PlayerProfileMapper {
                 entity.getNumberOfGamesWon(),
                 entity.getScore()
         );
+    }
+
+    public List<PlayerProfile> toDomain (List<JpaPlayerProfileEntity> entities){
+        return entities.stream().map(this::toDomain).toList();
     }
 }

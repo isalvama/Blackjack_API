@@ -5,7 +5,7 @@ import cat.itacademy.blackjack.demo.finished_game.domain.exception.InvalidFinish
 import java.util.Optional;
 
 public record FinishedGameSortCriteria(
-        SortType sortType,
+        FinishedGameSortType sortType,
         Optional<Long> playerId,
         Optional<String> playerName
 ) {

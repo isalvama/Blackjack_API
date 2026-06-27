@@ -6,6 +6,5 @@ import cat.itacademy.blackjack.demo.finished_game.infrastructure.web.FinishedGam
 import java.util.List;
 
 public interface GetFinishedGamesSortedUseCase {
-
     List<FinishedGameResponseDto> execute(FinishedGameSortCriteria criteria);
 }

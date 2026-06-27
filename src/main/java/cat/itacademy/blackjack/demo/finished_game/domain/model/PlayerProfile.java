@@ -1,6 +1,5 @@
 package cat.itacademy.blackjack.demo.finished_game.domain.model;
 
-import cat.itacademy.blackjack.demo.common.domain.GameResult;
 import cat.itacademy.blackjack.demo.finished_game.domain.exception.InvalidPlayerProfileException;
 import cat.itacademy.blackjack.demo.common.domain.value_object.Name;
 import lombok.Getter;

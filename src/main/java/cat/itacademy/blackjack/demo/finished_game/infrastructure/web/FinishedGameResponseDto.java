@@ -17,9 +17,9 @@ public record FinishedGameResponseDto (
        String gameResult,
        Boolean finishedWithBlackjack,
        LocalDateTime createdAt,
-       LocalDateTime finishedAt){
+       LocalDateTime finishedAt) {
 
-    public static FinishedGameResponseDto from (FinishedGame finishedGame){
+    public static FinishedGameResponseDto from(FinishedGame finishedGame) {
         return new FinishedGameResponseDto(
                 finishedGame.getId(),
                 finishedGame.getGameId().toString(),
@@ -36,10 +36,10 @@ public record FinishedGameResponseDto (
         );
     }
 
-    public static List<FinishedGameResponseDto> from (List<FinishedGame> finishedGames){
+    public static List<FinishedGameResponseDto> from(List<FinishedGame> finishedGames) {
         return finishedGames.stream().map(FinishedGameResponseDto::from).toList();
     }
-    }
+}
 
 
 

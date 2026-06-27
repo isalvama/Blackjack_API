@@ -7,10 +7,13 @@ import cat.itacademy.blackjack.demo.finished_game.domain.model.FinishedGame;
 import cat.itacademy.blackjack.demo.finished_game.infrastructure.persistence.jpa.entity.JpaFinishedGameEntity;
 import cat.itacademy.blackjack.demo.finished_game.infrastructure.persistence.jpa.mapper.FinishedGameMapper;
 import cat.itacademy.blackjack.demo.finished_game.infrastructure.persistence.jpa.springDataRepository.JpaFinishedGameSpringDataRepository;
+import jakarta.persistence.criteria.JoinType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,11 +47,28 @@ public class JpaFinishedGameRepository implements FinishedGamePort {
                 criteria.sortType().getEntityProperty()
         );
 
-        List<JpaFinishedGameEntity> entities = criteria.playerId().map(p -> jpaGameSpringDataRepository.findByPlayerId(p, sort))
-                .or(() -> criteria.playerName().map(p -> jpaGameSpringDataRepository.findByPlayerName(p, sort)))
-                .orElseGet(() -> jpaGameSpringDataRepository.findAllWithPlayer(sort));
+        Specification<JpaFinishedGameEntity> fetchSpec = (root, query, cb) -> {
+            if (query.getResultType() != Long.class) {
+                root.fetch("player", JoinType.INNER);
+            }
+            return cb.conjunction(); // "WHERE 1=1" (no filtra nada aún)
+        };
+
+        List<Specification<JpaFinishedGameEntity>> filters = new ArrayList<>();
+        filters.add(fetchSpec);
+
+        criteria.playerId().ifPresent(id ->
+                filters.add((root, query, cb) -> cb.equal(root.get("player").get("id"), id))
+        );
+
+        criteria.playerName().ifPresent(name ->
+                filters.add((root, query, cb) -> cb.equal(root.get("player").get("name"), name))
+        );
+
+        Specification<JpaFinishedGameEntity> finalSpec = Specification.allOf(filters);
+
+        List<JpaFinishedGameEntity> entities = jpaGameSpringDataRepository.findAll(finalSpec, sort);
 
         return finishedGameMapper.toDomain(entities);
-
     }
 }
