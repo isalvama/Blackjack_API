@@ -3,7 +3,7 @@ package cat.itacademy.blackjack.demo.finished_game.application.service;
 import cat.itacademy.blackjack.demo.finished_game.application.port.in.GetPlayerProfilesSortedUseCase;
 import cat.itacademy.blackjack.demo.finished_game.domain.criteria.PlayerProfileSortType;
 import cat.itacademy.blackjack.demo.finished_game.infrastructure.persistence.jpa.repository.JpaPlayerProfileRepository;
-import cat.itacademy.blackjack.demo.finished_game.infrastructure.web.PlayerProfileResponseDto;
+import cat.itacademy.blackjack.demo.finished_game.infrastructure.web.player_profiles.dto.PlayerProfileResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

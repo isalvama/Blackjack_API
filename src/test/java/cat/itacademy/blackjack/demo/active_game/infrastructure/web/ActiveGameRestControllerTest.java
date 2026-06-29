@@ -37,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 @WebMvcTest(ActiveGameRestController.class)
-class GameRestControllerTest {
+class ActiveGameRestControllerTest {
     private static final String ID = UUID.randomUUID().toString();
     private static final String NAME = "Player Name";
     private static String GAME_STATE_STARTED = GameState.STARTED.toString();

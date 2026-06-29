@@ -44,10 +44,10 @@ public class ActiveGameRestController {
     /**
      * Creates a new game.
      *
-     * <p>POST /api/blackjack</p>
+     * <p>POST /api/active-games</p>
      *
      * <p>Returns HTTP 201 Created with a Location header pointing to the newly created game and the information of the game state
-     * created resource at {@code /api/blackjack/{id}}.</p>
+     * created resource at {@code /api/active-games/{id}}.</p>
      *
      * @param request DTO containing the player name
      * @return The newly created game state information with HTTP 201 Created status

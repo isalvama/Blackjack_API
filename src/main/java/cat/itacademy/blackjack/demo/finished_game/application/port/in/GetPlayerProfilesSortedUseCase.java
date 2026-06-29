@@ -1,7 +1,7 @@
 package cat.itacademy.blackjack.demo.finished_game.application.port.in;
 
 import cat.itacademy.blackjack.demo.finished_game.domain.criteria.PlayerProfileSortType;
-import cat.itacademy.blackjack.demo.finished_game.infrastructure.web.PlayerProfileResponseDto;
+import cat.itacademy.blackjack.demo.finished_game.infrastructure.web.player_profiles.dto.PlayerProfileResponseDto;
 
 import java.util.List;
 

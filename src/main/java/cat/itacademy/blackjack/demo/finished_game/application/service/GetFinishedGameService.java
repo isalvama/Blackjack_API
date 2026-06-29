@@ -5,7 +5,7 @@ import cat.itacademy.blackjack.demo.finished_game.application.exception.Finished
 import cat.itacademy.blackjack.demo.finished_game.application.port.in.GetFinishedGameUseCase;
 import cat.itacademy.blackjack.demo.finished_game.domain.model.FinishedGame;
 import cat.itacademy.blackjack.demo.finished_game.infrastructure.persistence.jpa.repository.JpaFinishedGameRepository;
-import cat.itacademy.blackjack.demo.finished_game.infrastructure.web.FinishedGameResponseDto;
+import cat.itacademy.blackjack.demo.finished_game.infrastructure.web.finished_games.dto.FinishedGamesResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,9 +17,9 @@ public class GetFinishedGameService implements GetFinishedGameUseCase {
     private final JpaFinishedGameRepository jpaFinishedGameRepository;
 
     @Override
-    public FinishedGameResponseDto getGameById(String gameId) {
+    public FinishedGamesResponseDto getGameById(String gameId) {
         Optional <FinishedGame> finishedGame = jpaFinishedGameRepository.findById(GameId.fromString(gameId));
-        return finishedGame.map(FinishedGameResponseDto::from).orElseThrow(() -> new FinishedGameNotFoundException("No games found with id " + gameId)
+        return finishedGame.map(FinishedGamesResponseDto::from).orElseThrow(() -> new FinishedGameNotFoundException("No games found with id " + gameId)
         );
     }
 }

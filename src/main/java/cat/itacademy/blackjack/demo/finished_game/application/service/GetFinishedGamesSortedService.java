@@ -4,7 +4,7 @@ import cat.itacademy.blackjack.demo.finished_game.application.port.in.GetFinishe
 import cat.itacademy.blackjack.demo.finished_game.domain.criteria.FinishedGameSortCriteria;
 import cat.itacademy.blackjack.demo.finished_game.domain.model.FinishedGame;
 import cat.itacademy.blackjack.demo.finished_game.infrastructure.persistence.jpa.repository.JpaFinishedGameRepository;
-import cat.itacademy.blackjack.demo.finished_game.infrastructure.web.FinishedGameResponseDto;
+import cat.itacademy.blackjack.demo.finished_game.infrastructure.web.finished_games.dto.FinishedGamesResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,8 +17,8 @@ public class GetFinishedGamesSortedService implements GetFinishedGamesSortedUseC
 
 
     @Override
-    public List<FinishedGameResponseDto> execute(FinishedGameSortCriteria criteria) {
+    public List<FinishedGamesResponseDto> execute(FinishedGameSortCriteria criteria) {
         List<FinishedGame> finishedGames = jpaFinishedGameRepository.getByCriteria(criteria);
-        return FinishedGameResponseDto.from(finishedGames);
+        return FinishedGamesResponseDto.from(finishedGames);
     }
 }
