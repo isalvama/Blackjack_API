@@ -1,6 +1,6 @@
 package cat.itacademy.blackjack.demo.common.domain.value_object;
 
-import cat.itacademy.blackjack.demo.game.domain.exception.InvalidIdException;
+import cat.itacademy.blackjack.demo.active_game.domain.exception.InvalidIdException;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
