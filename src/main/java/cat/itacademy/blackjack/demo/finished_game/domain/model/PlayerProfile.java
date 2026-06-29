@@ -31,8 +31,8 @@ public class PlayerProfile {
     public static PlayerProfile reconstitute (Long id, Name name,Long numberOfGamesPlayed, Long numberOfGamesWon, Long score){
         PlayerProfile playerProfile = new PlayerProfile(
                 name,
-                numberOfGamesWon,
                 numberOfGamesPlayed,
+                numberOfGamesWon,
                 score
         );
         playerProfile.id = validateNonNullPositiveLong(id, "id");
