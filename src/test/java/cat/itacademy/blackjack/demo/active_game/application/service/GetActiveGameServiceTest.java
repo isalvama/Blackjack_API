@@ -41,8 +41,8 @@ class GetActiveGameServiceTest {
         UserPlayer userPlayer = UserPlayer.create(Name.of(name));
         Game game = Game.reconstitute(GAME_ID, GameState.STARTED, userPlayer, Dealer.create(), Deck.create(), LocalDateTime.now(), LocalDateTime.now());
         game.dealerHits();
-        game.hit();
-        game.hit();
+        game.playerRequestedHit();
+        game.playerRequestedHit();
 
         when(activeGamePort.getActiveGame(GAME_ID)).thenReturn(Optional.of(game));
 
