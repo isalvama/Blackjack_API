@@ -56,13 +56,13 @@ public class JpaFinishedGameEntity {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @CreatedDate
     @Column(name = "finished_at", updatable = false)
     private LocalDateTime finishedAt;
 
-
     @PrePersist
     protected void onUpdate() {
-        this.finishedAt = LocalDateTime.now();
+        if (this.finishedAt == null) {
+            this.finishedAt = LocalDateTime.now();
+        }
     }
 }

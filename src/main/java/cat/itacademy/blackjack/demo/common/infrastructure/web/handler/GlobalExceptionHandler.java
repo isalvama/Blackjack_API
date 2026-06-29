@@ -5,6 +5,8 @@ import cat.itacademy.blackjack.demo.common.domain.exception.DomainException;
 import cat.itacademy.blackjack.demo.common.domain.exception.GameException;
 import cat.itacademy.blackjack.demo.active_game.domain.exception.GameNotFoundException;
 import cat.itacademy.blackjack.demo.finished_game.application.exception.EntityConflictException;
+import cat.itacademy.blackjack.demo.finished_game.application.exception.FinishedGameNotFoundException;
+import cat.itacademy.blackjack.demo.finished_game.application.exception.PlayerProfileNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -12,6 +14,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,9 +24,27 @@ public class GlobalExceptionHandler {
 
     @ResponseBody
     @ExceptionHandler(GameNotFoundException.class)
-    public ProblemDetail handleGameNotFoundException(DomainException ex) {
+    public ProblemDetail handleGameNotFoundException(GameNotFoundException ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
-        problemDetail.setTitle("Inexistence Error");
+        problemDetail.setTitle("Active Game Not Found Error");
+        problemDetail.setDetail(ex.getMessage());
+        return problemDetail;
+    }
+
+    @ResponseBody
+    @ExceptionHandler(PlayerProfileNotFoundException.class)
+    public ProblemDetail handlePlayerProfileNotFoundException(PlayerProfileNotFoundException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
+        problemDetail.setTitle("Player Profile Not Found Error");
+        problemDetail.setDetail(ex.getMessage());
+        return problemDetail;
+    }
+
+    @ResponseBody
+    @ExceptionHandler(FinishedGameNotFoundException.class)
+    public ProblemDetail handleFinishedGameNotFoundException(FinishedGameNotFoundException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
+        problemDetail.setTitle("Finished Game Not Found Error");
         problemDetail.setDetail(ex.getMessage());
         return problemDetail;
     }
@@ -84,6 +106,16 @@ public class GlobalExceptionHandler {
                 violation.getPropertyPath().toString(), violation.getMessage()
         ));
         problemDetail.setProperty("errors", errors);
+        return problemDetail;
+    }
+
+    @ResponseBody
+    @ExceptionHandler(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class)
+    public ProblemDetail handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        problemDetail.setTitle("Type Mismatch Error");
+        problemDetail.setDetail(String.format("The parameter '%s' with value '%s' could not be converted to type '%s'",
+                ex.getName(), ex.getValue(), ex.getRequiredType().getSimpleName()));
         return problemDetail;
     }
 }

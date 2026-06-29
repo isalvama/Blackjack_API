@@ -1,11 +1,11 @@
-package cat.itacademy.blackjack.demo.finished_game.infrastructure.web;
+package cat.itacademy.blackjack.demo.finished_game.infrastructure.web.finished_games.dto;
 
 import cat.itacademy.blackjack.demo.finished_game.domain.model.FinishedGame;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record FinishedGameResponseDto (
+public record FinishedGamesResponseDto(
        Long id,
        String gameId,
        Long playerId,
@@ -17,10 +17,12 @@ public record FinishedGameResponseDto (
        String gameResult,
        Boolean finishedWithBlackjack,
        LocalDateTime createdAt,
-       LocalDateTime finishedAt) {
+       LocalDateTime finishedAt,
+       Integer score
+) {
 
-    public static FinishedGameResponseDto from(FinishedGame finishedGame) {
-        return new FinishedGameResponseDto(
+    public static FinishedGamesResponseDto from(FinishedGame finishedGame) {
+        return new FinishedGamesResponseDto(
                 finishedGame.getId(),
                 finishedGame.getGameId().toString(),
                 finishedGame.getPlayerId(),
@@ -32,12 +34,13 @@ public record FinishedGameResponseDto (
                 finishedGame.getGameResult().name(),
                 finishedGame.getFinishedWithBlackjack(),
                 finishedGame.getCreatedAt(),
-                finishedGame.getFinishedAt()
+                finishedGame.getFinishedAt(),
+                finishedGame.getScore()
         );
     }
 
-    public static List<FinishedGameResponseDto> from(List<FinishedGame> finishedGames) {
-        return finishedGames.stream().map(FinishedGameResponseDto::from).toList();
+    public static List<FinishedGamesResponseDto> from(List<FinishedGame> finishedGames) {
+        return finishedGames.stream().map(FinishedGamesResponseDto::from).toList();
     }
 }
 

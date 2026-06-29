@@ -30,7 +30,6 @@ public class FinishedGame{
         this.gameResult = validateNotNull(gameResult, "gameResult cannot be null");
         this.finishedWithBlackjack = validateNotNull(finishedWithBlackjack, "finishedWithBlackjack cannot be null");
         this.createdAt = validateNotNull(createdAt, "createdAt cannot be null");
-        this.finishedAt = validateNotNull(finishedAt, "finishedAt cannot be null");
     }
 
     public static FinishedGame create (GameId gameId, HandState playerHandState, HandState dealerHandState, GameResult gameResult, Boolean finishedWithBlackjack, LocalDateTime createdAt) {

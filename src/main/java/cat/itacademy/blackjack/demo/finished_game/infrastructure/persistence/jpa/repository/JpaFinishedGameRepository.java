@@ -51,7 +51,7 @@ public class JpaFinishedGameRepository implements FinishedGamePort {
             if (query.getResultType() != Long.class) {
                 root.fetch("player", JoinType.INNER);
             }
-            return cb.conjunction(); // "WHERE 1=1" (no filtra nada aún)
+            return cb.conjunction();
         };
 
         List<Specification<JpaFinishedGameEntity>> filters = new ArrayList<>();
