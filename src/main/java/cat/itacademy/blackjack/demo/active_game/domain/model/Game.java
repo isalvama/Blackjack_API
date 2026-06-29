@@ -1,11 +1,11 @@
 package cat.itacademy.blackjack.demo.active_game.domain.model;
 
+import cat.itacademy.blackjack.demo.active_game.domain.exception.InvalidHitException;
 import cat.itacademy.blackjack.demo.common.domain.GameResult;
-import cat.itacademy.blackjack.demo.active_game.application.service.shuffle_strategy.ShuffleStrategy;
+import cat.itacademy.blackjack.demo.active_game.domain.shuffle_strategy.ShuffleStrategy;
 import cat.itacademy.blackjack.demo.active_game.domain.GameState;
 import cat.itacademy.blackjack.demo.common.domain.exception.GameException;
 import cat.itacademy.blackjack.demo.active_game.domain.exception.InvalidGameException;
-import cat.itacademy.blackjack.demo.active_game.domain.exception.InvalidHitException;
 import cat.itacademy.blackjack.demo.active_game.domain.value_object.Card;
 import cat.itacademy.blackjack.demo.common.domain.value_object.GameId;
 import cat.itacademy.blackjack.demo.active_game.domain.value_object.GameOutcome;
@@ -76,37 +76,24 @@ public class Game {
         playerHits();
         playerHits();
         if (this.userPlayer.checkBlackjack()){
-            this.userPlayer.setCardsValueToTwentyOne();
             dealerTurn();
             setFinalGameResult(determineBlackjackWinner(), true);
             }
         }
 
-    public void dealerHits () {
-        ensureGameIsActiveAndDeckHasCards();
-        Card card = this.deck.draw();
-        this.dealer.hit(card);
-    }
-
-    public void hit (){
+    public void playerRequestedHit(){
+        ensureGameIsActive();
         playerHits();
-        if (this.userPlayer.canChangeAceValue()){
-            this.userPlayer.changeAceValueToOne();
-        }
         if (this.userPlayer.totalValueIsGreaterThan21()){
             setFinalGameResult(GameResult.DEALER_WIN, false);
         }
     }
 
     public void stand (){
+        ensureGameIsActive();
         dealerTurn();
         if (this.dealer.checkBlackjack()){
-            this.dealer.setCardsValueToTwentyOne();
             setFinalGameResult(GameResult.DEALER_WIN, true);
-            return;
-        }
-        if (this.dealer.canChangeAceValue()){
-            this.dealer.changeAceValueToOne();
             return;
         }
         if (this.dealer.totalValueIsGreaterThan21()){
@@ -117,21 +104,32 @@ public class Game {
     }
 
     private void playerHits (){
-        ensureGameIsActiveAndDeckHasCards();
+        ensureDeckHasCards();
+        if (gameState == GameState.OVER) return;
         Card card = this.deck.draw();
         this.userPlayer.hit(card);
     }
 
     private void dealerTurn(){
-        while (!this.dealer.shouldStand()){
+        while (!this.dealer.shouldStand() && this.gameState != GameState.OVER && !this.deck.hasNoCards()){
             dealerHits();
         }
     }
 
-    private void ensureGameIsActiveAndDeckHasCards(){
-        if (gameState == GameState.OVER){
+    public void dealerHits () {
+        ensureDeckHasCards();
+        if (gameState == GameState.OVER) return;
+        Card card = this.deck.draw();
+        this.dealer.hit(card);
+    }
+
+    private void ensureGameIsActive(){
+        if (gameState == GameState.OVER) {
             throw new InvalidHitException("the player cannot hit a new card because the game is already over");
         }
+    }
+
+    private void ensureDeckHasCards(){
         if (this.deck.hasNoCards()) {
             setFinalGameResult(determineWinner(), false);
         }
@@ -158,8 +156,6 @@ public class Game {
             return GameResult.USER_WIN;
         }
     }
-
-
 
     private GameResult determineWinner(){
         int playerHandValue = this.userPlayer.getHandValue();

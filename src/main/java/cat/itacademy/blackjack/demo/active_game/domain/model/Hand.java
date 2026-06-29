@@ -38,15 +38,30 @@ public class Hand {
         );
     }
 
-     void addCard (Card card){
+    void addCard (Card card){
+        ensureCardIsValid(card);
+        this.cards.add(card);
+        updateTotalValue(card);
+    }
+
+    private void updateTotalValue(Card card){
+        if (this.isBlackjack()) {
+            this.setCardsValueToTwentyOne();
+            return;
+        }
+        this.totalValue += card.cardNumber().getValue();
+        if (this.valueIsGreaterThan21() && this.hasAce()) {
+            this.changeAceValueToOne();
+        }
+    }
+
+    private void ensureCardIsValid(Card card){
         if (card == null){
             throw new InvalidGameException("card to hit cannot be null");
         }
+
         if (this.cards.contains(card)) {
             throw new InvalidGameException("a player cannot take a repeated card");
-        } else {
-            this.cards.add(card);
-            this.totalValue += card.cardNumber().getValue();
         }
     }
 

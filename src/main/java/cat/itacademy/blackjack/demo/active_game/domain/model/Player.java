@@ -22,26 +22,14 @@ public abstract class Player {
         this.hand.addCard(card);
     }
 
-    boolean canChangeAceValue(){
-        return hand.valueIsGreaterThan21() && hand.hasAce();
-    }
 
     boolean totalValueIsGreaterThan21(){
         return this.hand.valueIsGreaterThan21();
     }
 
-    void changeAceValueToOne(){
-        this.hand.changeAceValueToOne();
-    }
-
     boolean checkBlackjack(){
-        return this.hand.isBlackjack();
+        return hand.isBlackjack();
     }
-
-    void setCardsValueToTwentyOne(){
-        this.hand.setCardsValueToTwentyOne();
-    }
-
     public Hand getHand() {
         return this.hand;
     }

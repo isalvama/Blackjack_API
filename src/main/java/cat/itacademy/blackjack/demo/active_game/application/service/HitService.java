@@ -24,7 +24,7 @@ public class HitService implements HitUseCase {
     @Override
     public GameResponseDto execute(String id) {
         Game game = gamePort.getActiveGame(GameId.fromString(id)).orElseThrow(() -> new GameNotFoundException(id));
-        game.hit();
+        game.playerRequestedHit();
         game.updateAuditInfo(LocalDateTime.now());
 
         if (game.getGameState() == GameState.OVER){
