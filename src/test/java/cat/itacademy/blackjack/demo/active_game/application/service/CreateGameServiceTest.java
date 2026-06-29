@@ -2,7 +2,7 @@ package cat.itacademy.blackjack.demo.active_game.application.service;
 
 import cat.itacademy.blackjack.demo.common.domain.GameResult;
 import cat.itacademy.blackjack.demo.active_game.application.port.out.ActiveGamePort;
-import cat.itacademy.blackjack.demo.active_game.application.service.shuffle_strategy.ShuffleStrategy;
+import cat.itacademy.blackjack.demo.active_game.domain.shuffle_strategy.ShuffleStrategy;
 import cat.itacademy.blackjack.demo.active_game.domain.GameState;
 import cat.itacademy.blackjack.demo.active_game.domain.event.GameFinishedEvent;
 import cat.itacademy.blackjack.demo.active_game.domain.event.GameFinishedEventPublisher;

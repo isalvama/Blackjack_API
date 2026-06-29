@@ -1,4 +1,4 @@
-package cat.itacademy.blackjack.demo.active_game.application.service.shuffle_strategy;
+package cat.itacademy.blackjack.demo.active_game.domain.shuffle_strategy;
 import cat.itacademy.blackjack.demo.active_game.domain.value_object.Card;
 import org.springframework.stereotype.Component;
 

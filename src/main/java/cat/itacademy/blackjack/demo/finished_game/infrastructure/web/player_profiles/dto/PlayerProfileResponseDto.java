@@ -1,4 +1,4 @@
-package cat.itacademy.blackjack.demo.finished_game.infrastructure.web;
+package cat.itacademy.blackjack.demo.finished_game.infrastructure.web.player_profiles.dto;
 
 import cat.itacademy.blackjack.demo.finished_game.domain.model.PlayerProfile;
 
