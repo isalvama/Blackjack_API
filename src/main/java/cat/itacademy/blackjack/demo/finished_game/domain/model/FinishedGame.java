@@ -24,12 +24,12 @@ public class FinishedGame{
     private Integer score;
 
     private FinishedGame(GameId gameId, HandState playerHandState, HandState dealerHandState, GameResult gameResult, Boolean finishedWithBlackjack, LocalDateTime createdAt) {
-        this.gameId = validateNotNull(gameId, "gameId cannot be null");
-        this.playerHandState = validateNotNull(playerHandState, "playerHandState cannot be null");
-        this.dealerHandState = validateNotNull(dealerHandState, "dealerHandState cannot be null");
-        this.gameResult = validateNotNull(gameResult, "gameResult cannot be null");
-        this.finishedWithBlackjack = validateNotNull(finishedWithBlackjack, "finishedWithBlackjack cannot be null");
-        this.createdAt = validateNotNull(createdAt, "createdAt cannot be null");
+        this.gameId = validateNotNull(gameId, "gameId");
+        this.playerHandState = validateNotNull(playerHandState, "playerHandState");
+        this.dealerHandState = validateNotNull(dealerHandState, "dealerHandState");
+        this.gameResult = validateNotNull(gameResult, "gameResult");
+        this.finishedWithBlackjack = validateNotNull(finishedWithBlackjack, "finishedWithBlackjack");
+        this.createdAt = validateNotNull(createdAt, "createdAt");
     }
 
     public static FinishedGame create (GameId gameId, HandState playerHandState, HandState dealerHandState, GameResult gameResult, Boolean finishedWithBlackjack, LocalDateTime createdAt) {
@@ -46,9 +46,6 @@ public class FinishedGame{
     }
 
     public static FinishedGame reconstitute(Long id, GameId gameId, Long playerId, Name playerName, HandState playerHandState, HandState dealerHandState, GameResult gameResult, Boolean finishedWithBlackjack, LocalDateTime createdAt, LocalDateTime finishedAt, Integer score) {
-        if (score < 0){
-            throw new InvalidFinishedGameException("score cannot be negative");
-        }
         FinishedGame finishedGame = new FinishedGame(
                 gameId,
                 playerHandState,
@@ -57,17 +54,19 @@ public class FinishedGame{
                 finishedWithBlackjack,
                 createdAt
        );
-       finishedGame.id = validateNotNull(id, "id cannot be null");
-       finishedGame.playerId = validateNotNull(playerId, "playerId cannot be null");
-       finishedGame.playerName = validateNotNull(playerName, "playerName cannot be null");
-       finishedGame.finishedAt = validateNotNull(finishedAt, "finishedAt cannot be null");
-       finishedGame.score = validateNotNull(score, "score cannot be null");
+       finishedGame.id = validateId(id, "id");
+       finishedGame.playerId = validateId(playerId, "playerId");
+       finishedGame.playerName = validateNotNull(playerName, "playerName");
+       finishedGame.finishedAt = validateNotNull(finishedAt, "finishedAt");
+        if (score == null) throw new InvalidFinishedGameException("score cannot be null");
+        if (score < 0) throw new InvalidFinishedGameException("score cannot be negative");
+        finishedGame.score = score;
        return finishedGame;
     }
 
     public void addPlayerProfileInfo(Long playerId, Name playerName) {
-        this.playerId = validateNotNull(playerId, "playerId cannot be null");
-        this.playerName = validateNotNull(playerName, "playerName cannot be null");
+        this.playerId = validateNotNull(playerId, "playerId");
+        this.playerName = validateNotNull(playerName, "playerName");
     }
 
     private void setScore() {
@@ -80,9 +79,17 @@ public class FinishedGame{
         }
     }
 
-    private static <T> T validateNotNull(T obj, String message) {
+    private static <T> T validateNotNull(T obj, String paramName) {
         if (obj == null)
-            throw new InvalidFinishedGameException(message);
+            throw new InvalidFinishedGameException(paramName + " cannot be null");
         return obj;
+    }
+
+    private static Long validateId(Long param, String paramName) {
+        if (param == null)
+            throw new InvalidFinishedGameException(paramName + " cannot be null");
+        if (param < 0)
+            throw new InvalidFinishedGameException(paramName + " cannot be negative");
+        return param;
     }
 }
