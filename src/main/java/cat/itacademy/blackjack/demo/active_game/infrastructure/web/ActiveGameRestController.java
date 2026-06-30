@@ -2,7 +2,7 @@ package cat.itacademy.blackjack.demo.active_game.infrastructure.web;
 
 import cat.itacademy.blackjack.demo.active_game.application.port.in.*;
 import cat.itacademy.blackjack.demo.active_game.infrastructure.web.dto.CreateGameDto;
-import cat.itacademy.blackjack.demo.active_game.infrastructure.web.dto.GameResponseDto;
+import cat.itacademy.blackjack.demo.active_game.infrastructure.web.dto.ActiveGameResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.validator.constraints.UUID;
@@ -54,8 +54,8 @@ public class ActiveGameRestController {
      *         and Location header
      */
     @PostMapping
-    public ResponseEntity<GameResponseDto> createNewGame(@Valid @RequestBody CreateGameDto request) {
-        GameResponseDto gameResponse = createGameUseCase.execute(request.name());
+    public ResponseEntity<ActiveGameResponseDto> createNewGame(@Valid @RequestBody CreateGameDto request) {
+        ActiveGameResponseDto gameResponse = createGameUseCase.execute(request.name());
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
@@ -66,26 +66,26 @@ public class ActiveGameRestController {
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<GameResponseDto> getActiveGameState(@PathVariable @UUID String id) {
-        GameResponseDto gameResponse = getActiveGameUseCase.execute(id);
+    public ResponseEntity<ActiveGameResponseDto> getActiveGameState(@PathVariable @UUID String id) {
+        ActiveGameResponseDto gameResponse = getActiveGameUseCase.execute(id);
         return ResponseEntity.ok(gameResponse);
     }
 
     @GetMapping
-    public ResponseEntity<List<GameResponseDto>> getAllActiveGames() {
-        List<GameResponseDto> gameResponses = getAllActiveGamesUseCase.execute();
+    public ResponseEntity<List<ActiveGameResponseDto>> getAllActiveGames() {
+        List<ActiveGameResponseDto> gameResponses = getAllActiveGamesUseCase.execute();
         return ResponseEntity.ok(gameResponses);
     }
 
     @PostMapping("{id}/hit")
-    public ResponseEntity<GameResponseDto> hit(@PathVariable @UUID String id) {
-        GameResponseDto gameResponse = hitUseCase.execute(id);
+    public ResponseEntity<ActiveGameResponseDto> hit(@PathVariable @UUID String id) {
+        ActiveGameResponseDto gameResponse = hitUseCase.execute(id);
         return ResponseEntity.ok(gameResponse);
     }
 
     @PostMapping("{id}/stand")
-    public ResponseEntity<GameResponseDto> stand(@PathVariable @UUID String id) {
-        GameResponseDto gameResponse = standUseCase.execute(id);
+    public ResponseEntity<ActiveGameResponseDto> stand(@PathVariable @UUID String id) {
+        ActiveGameResponseDto gameResponse = standUseCase.execute(id);
         return ResponseEntity.ok(gameResponse);
     }
 }

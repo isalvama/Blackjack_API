@@ -1,7 +1,7 @@
 package cat.itacademy.blackjack.demo.active_game.application.port.in;
 
-import cat.itacademy.blackjack.demo.active_game.infrastructure.web.dto.GameResponseDto;
+import cat.itacademy.blackjack.demo.active_game.infrastructure.web.dto.ActiveGameResponseDto;
 
 public interface StandUseCase {
-    GameResponseDto execute (String id);
+    ActiveGameResponseDto execute (String id);
 }

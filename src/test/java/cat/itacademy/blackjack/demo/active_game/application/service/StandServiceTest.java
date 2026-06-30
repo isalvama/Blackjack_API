@@ -14,7 +14,7 @@ import cat.itacademy.blackjack.demo.active_game.domain.model.Deck;
 import cat.itacademy.blackjack.demo.active_game.domain.model.Game;
 import cat.itacademy.blackjack.demo.active_game.domain.model.UserPlayer;
 import cat.itacademy.blackjack.demo.active_game.domain.value_object.Card;
-import cat.itacademy.blackjack.demo.active_game.infrastructure.web.dto.GameResponseDto;
+import cat.itacademy.blackjack.demo.active_game.infrastructure.web.dto.ActiveGameResponseDto;
 import cat.itacademy.blackjack.demo.shuffle_strategy.GameWithoutBlackJackStrategy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -73,7 +73,7 @@ class StandServiceTest {
 
         when(gamePort.getActiveGame(GAME_ID)).thenReturn(Optional.of(game));
 
-        GameResponseDto result = standService.execute(ID);
+        ActiveGameResponseDto result = standService.execute(ID);
 
         assertThat(result).isNotNull();
         assertThat(result.gameState()).isEqualTo(GameState.OVER.name());

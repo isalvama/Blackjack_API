@@ -76,7 +76,7 @@ public class Game {
         playerHits();
         playerHits();
         if (this.userPlayer.checkBlackjack()){
-            dealerTurn();
+            dealerHits();
             setFinalGameResult(determineBlackjackWinner(), true);
             }
         }
@@ -111,7 +111,7 @@ public class Game {
     }
 
     private void dealerTurn(){
-        while (!this.dealer.shouldStand() && this.gameState != GameState.OVER && !this.deck.hasNoCards()){
+        while (!this.dealer.shouldStand() && this.gameState != GameState.OVER && !this.deck.hasNoCards() && !this.dealer.checkBlackjack()){
             dealerHits();
         }
     }

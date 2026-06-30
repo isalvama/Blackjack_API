@@ -8,7 +8,7 @@ import cat.itacademy.blackjack.demo.active_game.domain.event.GameFinishedEvent;
 import cat.itacademy.blackjack.demo.active_game.domain.event.GameFinishedEventPublisher;
 import cat.itacademy.blackjack.demo.active_game.domain.exception.GameNotFoundException;
 import cat.itacademy.blackjack.demo.active_game.domain.model.Game;
-import cat.itacademy.blackjack.demo.active_game.infrastructure.web.dto.GameResponseDto;
+import cat.itacademy.blackjack.demo.active_game.infrastructure.web.dto.ActiveGameResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +22,7 @@ public class HitService implements HitUseCase {
 
 
     @Override
-    public GameResponseDto execute(String id) {
+    public ActiveGameResponseDto execute(String id) {
         Game game = gamePort.getActiveGame(GameId.fromString(id)).orElseThrow(() -> new GameNotFoundException(id));
         game.playerRequestedHit();
         game.updateAuditInfo(LocalDateTime.now());
@@ -33,6 +33,6 @@ public class HitService implements HitUseCase {
         } else {
             gamePort.saveActiveGame(game);
         }
-        return GameResponseDto.from(game);
+        return ActiveGameResponseDto.from(game);
     }
 }

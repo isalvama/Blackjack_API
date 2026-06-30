@@ -9,7 +9,7 @@ import cat.itacademy.blackjack.demo.active_game.domain.model.Dealer;
 import cat.itacademy.blackjack.demo.active_game.domain.model.Deck;
 import cat.itacademy.blackjack.demo.active_game.domain.model.Game;
 import cat.itacademy.blackjack.demo.active_game.domain.model.UserPlayer;
-import cat.itacademy.blackjack.demo.active_game.infrastructure.web.dto.GameResponseDto;
+import cat.itacademy.blackjack.demo.active_game.infrastructure.web.dto.ActiveGameResponseDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -46,7 +46,7 @@ class GetActiveGameServiceTest {
 
         when(activeGamePort.getActiveGame(GAME_ID)).thenReturn(Optional.of(game));
 
-        GameResponseDto gameResponseDto = getActiveGameService.execute(ID);
+        ActiveGameResponseDto gameResponseDto = getActiveGameService.execute(ID);
 
         assertEquals(gameResponseDto.id(), ID);
         assertNotNull(gameResponseDto.createdAt());
