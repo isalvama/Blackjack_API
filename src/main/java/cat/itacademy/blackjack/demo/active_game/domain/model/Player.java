@@ -1,6 +1,6 @@
 package cat.itacademy.blackjack.demo.active_game.domain.model;
 
-import cat.itacademy.blackjack.demo.active_game.domain.exception.InvalidGameException;
+import cat.itacademy.blackjack.demo.active_game.domain.exception.InvalidActiveGameException;
 import cat.itacademy.blackjack.demo.active_game.domain.exception.InvalidPlayerException;
 import cat.itacademy.blackjack.demo.active_game.domain.value_object.Card;
 
@@ -17,7 +17,7 @@ public abstract class Player {
 
     public void hit(Card card){
         if (card == null){
-            throw new InvalidGameException("the card hit cannot be null");
+            throw new InvalidActiveGameException("the card hit cannot be null");
         }
         this.hand.addCard(card);
     }

@@ -13,6 +13,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GetAllActiveGamesService implements GetAllActiveGamesUseCase {
     private final ActiveGamePort activeGamePort;
+
     @Override
     public List<ActiveGameResponseDto> execute() {
         List<Game> games = activeGamePort.getAllActiveGames();

@@ -2,7 +2,7 @@ package cat.itacademy.blackjack.demo.active_game.infrastructure.web;
 
 import cat.itacademy.blackjack.demo.active_game.application.port.in.*;
 import cat.itacademy.blackjack.demo.active_game.domain.GameState;
-import cat.itacademy.blackjack.demo.active_game.domain.exception.GameNotFoundException;
+import cat.itacademy.blackjack.demo.active_game.application.exception.ActiveGameNotFoundException;
 import cat.itacademy.blackjack.demo.active_game.infrastructure.web.dto.CardDto;
 import cat.itacademy.blackjack.demo.active_game.infrastructure.web.dto.CreateGameDto;
 import cat.itacademy.blackjack.demo.active_game.infrastructure.web.dto.ActiveGameResponseDto;
@@ -202,7 +202,7 @@ class ActiveGameRestControllerTest {
         @Test
         void shouldReturn404NotFound() throws Exception {
 
-            when(getActiveGameUseCase.execute(ID)).thenThrow(new GameNotFoundException(ID));
+            when(getActiveGameUseCase.execute(ID)).thenThrow(new ActiveGameNotFoundException(ID));
 
             ResultActions result = mockMvc.perform(MockMvcRequestBuilders.get(API_URL + "/" + ID)
                     .contentType(MediaType.APPLICATION_JSON));
@@ -258,7 +258,7 @@ class ActiveGameRestControllerTest {
         @Test
         void shouldReturn404NotFound() throws Exception {
 
-            when(hitUseCase.execute(ID)).thenThrow(new GameNotFoundException(ID));
+            when(hitUseCase.execute(ID)).thenThrow(new ActiveGameNotFoundException(ID));
 
             ResultActions result = mockMvc.perform(MockMvcRequestBuilders.post(API_URL + "/" + ID + "/hit")
                     .contentType(MediaType.APPLICATION_JSON));
@@ -319,7 +319,7 @@ class ActiveGameRestControllerTest {
         @Test
         void shouldReturn404NotFound() throws Exception {
 
-            when(standUseCase.execute(ID)).thenThrow(new GameNotFoundException(ID));
+            when(standUseCase.execute(ID)).thenThrow(new ActiveGameNotFoundException(ID));
 
             ResultActions result = mockMvc.perform(MockMvcRequestBuilders.post(API_URL + "/" + ID + "/stand")
                     .contentType(MediaType.APPLICATION_JSON));

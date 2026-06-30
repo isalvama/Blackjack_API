@@ -1,12 +1,10 @@
 package cat.itacademy.blackjack.demo.common.infrastructure.web.handler;
 
+import cat.itacademy.blackjack.demo.common.application.exception.ApplicationException;
+import cat.itacademy.blackjack.demo.common.application.exception.NotFoundException;
 import cat.itacademy.blackjack.demo.common.domain.exception.BlackjackException;
 import cat.itacademy.blackjack.demo.common.domain.exception.DomainException;
-import cat.itacademy.blackjack.demo.common.domain.exception.GameException;
-import cat.itacademy.blackjack.demo.active_game.domain.exception.GameNotFoundException;
-import cat.itacademy.blackjack.demo.finished_game.application.exception.EntityConflictException;
-import cat.itacademy.blackjack.demo.finished_game.application.exception.FinishedGameNotFoundException;
-import cat.itacademy.blackjack.demo.finished_game.application.exception.PlayerProfileNotFoundException;
+import cat.itacademy.blackjack.demo.common.application.exception.EntityConflictException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -23,37 +21,10 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ResponseBody
-    @ExceptionHandler(GameNotFoundException.class)
-    public ProblemDetail handleGameNotFoundException(GameNotFoundException ex) {
+    @ExceptionHandler(NotFoundException.class)
+    public ProblemDetail handleNotFoundException(NotFoundException ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
-        problemDetail.setTitle("Active Game Not Found Error");
-        problemDetail.setDetail(ex.getMessage());
-        return problemDetail;
-    }
-
-    @ResponseBody
-    @ExceptionHandler(PlayerProfileNotFoundException.class)
-    public ProblemDetail handlePlayerProfileNotFoundException(PlayerProfileNotFoundException ex) {
-        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
-        problemDetail.setTitle("Player Profile Not Found Error");
-        problemDetail.setDetail(ex.getMessage());
-        return problemDetail;
-    }
-
-    @ResponseBody
-    @ExceptionHandler(FinishedGameNotFoundException.class)
-    public ProblemDetail handleFinishedGameNotFoundException(FinishedGameNotFoundException ex) {
-        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
-        problemDetail.setTitle("Finished Game Not Found Error");
-        problemDetail.setDetail(ex.getMessage());
-        return problemDetail;
-    }
-
-    @ResponseBody
-    @ExceptionHandler(GameException.class)
-    public ProblemDetail handleGameException(GameException ex) {
-        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.METHOD_NOT_ALLOWED);
-        problemDetail.setTitle("Business Rule Error");
+        problemDetail.setTitle("Not Found Error");
         problemDetail.setDetail(ex.getMessage());
         return problemDetail;
     }
@@ -70,7 +41,16 @@ public class GlobalExceptionHandler {
     @ResponseBody
     @ExceptionHandler(EntityConflictException.class)
     public ProblemDetail handleEntityConflictException(EntityConflictException ex) {
-        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.CONFLICT);
+        problemDetail.setTitle("Conflict Error");
+        problemDetail.setDetail(ex.getMessage());
+        return problemDetail;
+    }
+
+    @ResponseBody
+    @ExceptionHandler(ApplicationException.class)
+    public ProblemDetail handleApplicationException(ApplicationException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.CONFLICT);
         problemDetail.setTitle("Conflict Error");
         problemDetail.setDetail(ex.getMessage());
         return problemDetail;

@@ -8,7 +8,7 @@ import cat.itacademy.blackjack.demo.active_game.domain.shuffle_strategy.ShuffleS
 import cat.itacademy.blackjack.demo.active_game.domain.GameState;
 import cat.itacademy.blackjack.demo.active_game.domain.event.GameFinishedEvent;
 import cat.itacademy.blackjack.demo.active_game.domain.event.GameFinishedEventPublisher;
-import cat.itacademy.blackjack.demo.active_game.domain.exception.GameNotFoundException;
+import cat.itacademy.blackjack.demo.active_game.application.exception.ActiveGameNotFoundException;
 import cat.itacademy.blackjack.demo.active_game.domain.model.Dealer;
 import cat.itacademy.blackjack.demo.active_game.domain.model.Deck;
 import cat.itacademy.blackjack.demo.active_game.domain.model.Game;
@@ -134,7 +134,7 @@ class HitServiceTest {
 
         when(gamePort.getActiveGame(any(GameId.class))).thenReturn(Optional.empty());
 
-        Exception exception = assertThrows(GameNotFoundException.class, () -> {hitService.execute(ID);});
+        Exception exception = assertThrows(ActiveGameNotFoundException.class, () -> {hitService.execute(ID);});
 
         assertTrue(exception.getMessage().contains("Game"));
         assertTrue(exception.getMessage().contains("not"));

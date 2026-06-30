@@ -2,7 +2,7 @@ package cat.itacademy.blackjack.demo.active_game.domain.model;
 
 import cat.itacademy.blackjack.demo.active_game.domain.CardNumber;
 import cat.itacademy.blackjack.demo.active_game.domain.Suit;
-import cat.itacademy.blackjack.demo.active_game.domain.exception.InvalidGameException;
+import cat.itacademy.blackjack.demo.active_game.domain.exception.InvalidActiveGameException;
 import cat.itacademy.blackjack.demo.active_game.domain.exception.InvalidHandException;
 import cat.itacademy.blackjack.demo.active_game.domain.value_object.Card;
 import org.junit.jupiter.api.Test;
@@ -57,7 +57,7 @@ class HandTest {
     @Test
     void addCardThrowsExceptionIfCardIsNull() {
         Hand hand = Hand.create();
-        Exception exception = assertThrows(InvalidGameException.class, () -> {
+        Exception exception = assertThrows(InvalidActiveGameException.class, () -> {
                     hand.addCard(null);
                 }
         );
@@ -71,7 +71,7 @@ class HandTest {
         Card repeatedCard = new Card(CardNumber.ACE, Suit.DIAMONDS);
         List<Card> cards = List.of(repeatedCard);
         Hand hand = Hand.reconstitute(cards, 1);
-        Exception exception = assertThrows(InvalidGameException.class, () -> {
+        Exception exception = assertThrows(InvalidActiveGameException.class, () -> {
                     hand.addCard(repeatedCard);
                 }
         );

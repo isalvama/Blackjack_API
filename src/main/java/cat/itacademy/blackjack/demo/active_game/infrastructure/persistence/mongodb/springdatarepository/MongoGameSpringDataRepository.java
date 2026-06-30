@@ -4,8 +4,10 @@ import cat.itacademy.blackjack.demo.active_game.infrastructure.persistence.mongo
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.UUID;
+
 
 @Repository
-public interface MongoGameSpringDataRepository extends MongoRepository<GameDocument, String> {
+public interface MongoGameSpringDataRepository extends MongoRepository<GameDocument, UUID> {
 
 }

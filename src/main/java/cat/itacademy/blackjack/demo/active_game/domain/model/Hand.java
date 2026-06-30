@@ -1,6 +1,6 @@
 package cat.itacademy.blackjack.demo.active_game.domain.model;
 import cat.itacademy.blackjack.demo.active_game.domain.CardNumber;
-import cat.itacademy.blackjack.demo.active_game.domain.exception.InvalidGameException;
+import cat.itacademy.blackjack.demo.active_game.domain.exception.InvalidActiveGameException;
 import cat.itacademy.blackjack.demo.active_game.domain.exception.InvalidHandException;
 import cat.itacademy.blackjack.demo.active_game.domain.value_object.Card;
 import lombok.Getter;
@@ -57,11 +57,11 @@ public class Hand {
 
     private void ensureCardIsValid(Card card){
         if (card == null){
-            throw new InvalidGameException("card to hit cannot be null");
+            throw new InvalidActiveGameException("card to hit cannot be null");
         }
 
         if (this.cards.contains(card)) {
-            throw new InvalidGameException("a player cannot take a repeated card");
+            throw new InvalidActiveGameException("a player cannot take a repeated card");
         }
     }
 

@@ -30,7 +30,7 @@ public class MongoGameRepository implements ActiveGamePort {
 
     @Override
     public Optional<Game> getActiveGame(GameId id) {
-        return mongoGameSpringDataRepository.findById(id.toString())
+        return mongoGameSpringDataRepository.findById(id.value())
                 .map(GameDocumentMapper::toModelEntity);
     }
 
@@ -45,6 +45,6 @@ public class MongoGameRepository implements ActiveGamePort {
 
     @Override
     public void deleteActiveGame(GameId id) {
-        mongoGameSpringDataRepository.deleteById(id.toString());
+        mongoGameSpringDataRepository.deleteById(id.value());
     }
 }

@@ -4,7 +4,7 @@ import cat.itacademy.blackjack.demo.common.domain.value_object.GameId;
 import cat.itacademy.blackjack.demo.common.domain.value_object.Name;
 import cat.itacademy.blackjack.demo.active_game.application.port.out.ActiveGamePort;
 import cat.itacademy.blackjack.demo.active_game.domain.GameState;
-import cat.itacademy.blackjack.demo.active_game.domain.exception.GameNotFoundException;
+import cat.itacademy.blackjack.demo.active_game.application.exception.ActiveGameNotFoundException;
 import cat.itacademy.blackjack.demo.active_game.domain.model.Dealer;
 import cat.itacademy.blackjack.demo.active_game.domain.model.Deck;
 import cat.itacademy.blackjack.demo.active_game.domain.model.Game;
@@ -67,7 +67,7 @@ class GetActiveGameServiceTest {
 
         when(activeGamePort.getActiveGame(GAME_ID)).thenReturn(Optional.empty());
 
-        Exception exception = assertThrows(GameNotFoundException.class, () -> {getActiveGameService.execute(ID);});
+        Exception exception = assertThrows(ActiveGameNotFoundException.class, () -> {getActiveGameService.execute(ID);});
 
         assertTrue(exception.getMessage().contains("Game"));
         assertTrue(exception.getMessage().contains("not"));

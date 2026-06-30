@@ -4,8 +4,8 @@ import cat.itacademy.blackjack.demo.active_game.domain.exception.InvalidHitExcep
 import cat.itacademy.blackjack.demo.common.domain.GameResult;
 import cat.itacademy.blackjack.demo.active_game.domain.shuffle_strategy.ShuffleStrategy;
 import cat.itacademy.blackjack.demo.active_game.domain.GameState;
-import cat.itacademy.blackjack.demo.common.domain.exception.GameException;
-import cat.itacademy.blackjack.demo.active_game.domain.exception.InvalidGameException;
+import cat.itacademy.blackjack.demo.active_game.domain.exception.ActiveGameException;
+import cat.itacademy.blackjack.demo.active_game.domain.exception.InvalidActiveGameException;
 import cat.itacademy.blackjack.demo.active_game.domain.value_object.Card;
 import cat.itacademy.blackjack.demo.common.domain.value_object.GameId;
 import cat.itacademy.blackjack.demo.active_game.domain.value_object.GameOutcome;
@@ -26,7 +26,7 @@ public class Game {
 
     private Game(GameId id, UserPlayer userPlayer, Dealer dealer, Deck deck) {
         if (deck.getCards().isEmpty()){
-            throw new InvalidGameException("deck's list of cards cannot be empty");
+            throw new InvalidActiveGameException("deck's list of cards cannot be empty");
         }
         this.id = validateNotNull(id, "id cannot be null");
         this.userPlayer = validateNotNull(userPlayer, "userPlayer cannot be null");
@@ -69,7 +69,7 @@ public class Game {
 
     public void start (ShuffleStrategy shuffleStrategy){
         if (gameState != GameState.STARTED){
-            throw new GameException("the Game cannot start over because it has already started");
+            throw new ActiveGameException("the Game cannot start over because it has already started");
         }
         this.deck.shuffle(shuffleStrategy);
         dealerHits();
@@ -172,7 +172,7 @@ public class Game {
 
     private static <T> T validateNotNull(T obj, String message) {
         if (obj == null)
-            throw new InvalidGameException(message);
+            throw new InvalidActiveGameException(message);
         return obj;
     }
 }

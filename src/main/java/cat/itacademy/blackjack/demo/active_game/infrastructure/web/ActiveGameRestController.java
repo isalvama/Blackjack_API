@@ -14,21 +14,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 
-/**
- * GameRestController exposes game management operations as REST endpoints.
- *
- * <p>In hexagonal architecture terms, this is a <strong>primary adapter</strong> (driving adapter)
- * that adapts HTTP requests to calls on the application's primary ports. It provides a REST API
- * for interacting with the core application functionality.</p>
- *
- * <p>This controller handles the following operations:</p>
- * <ul>
- *   <li>Game creation and intial state information</li>
- *   <li>Active Game State retrieval</li> TODO
- *   <li>Stock purchases and sales</li> TODO
- *   <li>Transaction history retrieval</li> TODO
- * </ul>
- */
 @RestController
 @RequestMapping("/api/active-games")
 @Validated
@@ -39,20 +24,8 @@ public class ActiveGameRestController {
     private final GetAllActiveGamesUseCase getAllActiveGamesUseCase;
     private final HitUseCase hitUseCase;
     private final StandUseCase standUseCase;
+    private final DeleteUseCase deleteUseCase;
 
-
-    /**
-     * Creates a new game.
-     *
-     * <p>POST /api/active-games</p>
-     *
-     * <p>Returns HTTP 201 Created with a Location header pointing to the newly created game and the information of the game state
-     * created resource at {@code /api/active-games/{id}}.</p>
-     *
-     * @param request DTO containing the player name
-     * @return The newly created game state information with HTTP 201 Created status
-     *         and Location header
-     */
     @PostMapping
     public ResponseEntity<ActiveGameResponseDto> createNewGame(@Valid @RequestBody CreateGameDto request) {
         ActiveGameResponseDto gameResponse = createGameUseCase.execute(request.name());
@@ -87,5 +60,10 @@ public class ActiveGameRestController {
     public ResponseEntity<ActiveGameResponseDto> stand(@PathVariable @UUID String id) {
         ActiveGameResponseDto gameResponse = standUseCase.execute(id);
         return ResponseEntity.ok(gameResponse);
+    }
+
+    @DeleteMapping("{id}")
+    public void deleteActiveGame(@PathVariable @UUID String id) {
+        deleteUseCase.execute(id);
     }
 }

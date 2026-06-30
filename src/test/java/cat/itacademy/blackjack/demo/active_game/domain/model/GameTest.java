@@ -8,7 +8,7 @@ import cat.itacademy.blackjack.demo.active_game.domain.GameState;
 import cat.itacademy.blackjack.demo.active_game.domain.shuffle_strategy.ShuffleStrategy;
 import cat.itacademy.blackjack.demo.active_game.domain.value_object.Card;
 import cat.itacademy.blackjack.demo.common.domain.GameResult;
-import cat.itacademy.blackjack.demo.common.domain.exception.GameException;
+import cat.itacademy.blackjack.demo.active_game.domain.exception.ActiveGameException;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -93,7 +93,7 @@ class GameTest {
             Game overGame = Game.reconstitute(GameId.fromUUID(UUID.randomUUID()), GameState.OVER, userPlayer, dealer, deck, LocalDateTime.now(), LocalDateTime.now());
 
             assertThatThrownBy(() -> overGame.start(shuffleStrategy))
-                    .isInstanceOf(GameException.class)
+                    .isInstanceOf(ActiveGameException.class)
                     .hasMessageContaining("already started");
         }
     }

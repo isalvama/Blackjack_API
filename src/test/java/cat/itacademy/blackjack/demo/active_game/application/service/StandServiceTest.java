@@ -8,7 +8,7 @@ import cat.itacademy.blackjack.demo.active_game.domain.shuffle_strategy.ShuffleS
 import cat.itacademy.blackjack.demo.active_game.domain.GameState;
 import cat.itacademy.blackjack.demo.active_game.domain.event.GameFinishedEvent;
 import cat.itacademy.blackjack.demo.active_game.domain.event.GameFinishedEventPublisher;
-import cat.itacademy.blackjack.demo.active_game.domain.exception.GameNotFoundException;
+import cat.itacademy.blackjack.demo.active_game.application.exception.ActiveGameNotFoundException;
 import cat.itacademy.blackjack.demo.active_game.domain.model.Dealer;
 import cat.itacademy.blackjack.demo.active_game.domain.model.Deck;
 import cat.itacademy.blackjack.demo.active_game.domain.model.Game;
@@ -93,7 +93,7 @@ class StandServiceTest {
 
         when(gamePort.getActiveGame(any(GameId.class))).thenReturn(Optional.empty());
 
-        Exception exception = assertThrows(GameNotFoundException.class, () -> {standService.execute(ID);});
+        Exception exception = assertThrows(ActiveGameNotFoundException.class, () -> {standService.execute(ID);});
 
         assertTrue(exception.getMessage().contains("Game"));
         assertTrue(exception.getMessage().contains("not"));
