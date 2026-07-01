@@ -6,6 +6,7 @@ import cat.itacademy.blackjack.demo.active_game.domain.model.Game;
 import cat.itacademy.blackjack.demo.active_game.infrastructure.persistence.mongodb.springdatarepository.MongoGameSpringDataRepository;
 import cat.itacademy.blackjack.demo.active_game.infrastructure.persistence.mongodb.document.GameDocument;
 import cat.itacademy.blackjack.demo.active_game.infrastructure.persistence.mongodb.mapper.GameDocumentMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
@@ -14,12 +15,9 @@ import java.util.Optional;
 
 @Profile("mongodb")
 @Repository
+@RequiredArgsConstructor
 public class MongoGameRepository implements ActiveGamePort {
     private final MongoGameSpringDataRepository mongoGameSpringDataRepository;
-
-    public MongoGameRepository(MongoGameSpringDataRepository mongoGameSpringDataRepository) {
-        this.mongoGameSpringDataRepository = mongoGameSpringDataRepository;
-    }
 
     @Override
     public Game saveActiveGame(Game game) {
@@ -30,7 +28,7 @@ public class MongoGameRepository implements ActiveGamePort {
 
     @Override
     public Optional<Game> getActiveGame(GameId id) {
-        return mongoGameSpringDataRepository.findById(id.value())
+        return mongoGameSpringDataRepository.findById(id.value().toString())
                 .map(GameDocumentMapper::toModelEntity);
     }
 
@@ -45,6 +43,6 @@ public class MongoGameRepository implements ActiveGamePort {
 
     @Override
     public void deleteActiveGame(GameId id) {
-        mongoGameSpringDataRepository.deleteById(id.value());
+        mongoGameSpringDataRepository.deleteById(id.value().toString());
     }
 }

@@ -32,7 +32,6 @@ public class CreateGameService implements CreateGameUseCase {
         game.updateAuditInfo(LocalDateTime.now(), LocalDateTime.now());
 
         if (game.getGameState() == GameState.OVER){
-            gamePort.deleteActiveGame(game.getId());
             eventPublisher.publishEvent(GameFinishedEvent.from(game));
         } else {
             game = gamePort.saveActiveGame(game);

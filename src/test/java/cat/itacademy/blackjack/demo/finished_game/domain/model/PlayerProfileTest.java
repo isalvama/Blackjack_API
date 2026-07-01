@@ -1,8 +1,8 @@
 package cat.itacademy.blackjack.demo.finished_game.domain.model;
 
+import cat.itacademy.blackjack.demo.common.domain.GameResult;
 import cat.itacademy.blackjack.demo.common.domain.value_object.Name;
 import cat.itacademy.blackjack.demo.finished_game.domain.exception.InvalidPlayerProfileException;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -78,7 +78,7 @@ class PlayerProfileTest {
         void shouldUpdateNumberOfGamesAndScoreCorrectly() {
             PlayerProfile profile = PlayerProfile.reconstitute(1L, VALID_NAME, 5L, 2L, 100L);
 
-            profile.updateProfileWithNewGame(50);
+            profile.updateProfileWithNewGame(GameResult.USER_WIN, 50);
 
             assertThat(profile.getNumberOfGamesPlayed()).isEqualTo(6L);
             assertThat(profile.getNumberOfGamesWon()).isEqualTo(3L);
@@ -89,7 +89,7 @@ class PlayerProfileTest {
         void shouldUpdateNewProfile() {
             PlayerProfile profile = PlayerProfile.create(VALID_NAME);
 
-            profile.updateProfileWithNewGame(21);
+            profile.updateProfileWithNewGame(GameResult.USER_WIN, 21);
 
             assertThat(profile.getNumberOfGamesPlayed()).isEqualTo(1L);
             assertThat(profile.getNumberOfGamesWon()).isEqualTo(1L);

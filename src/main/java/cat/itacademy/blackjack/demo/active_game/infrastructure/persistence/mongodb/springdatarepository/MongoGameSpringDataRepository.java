@@ -8,6 +8,6 @@ import java.util.UUID;
 
 
 @Repository
-public interface MongoGameSpringDataRepository extends MongoRepository<GameDocument, UUID> {
+public interface MongoGameSpringDataRepository extends MongoRepository<GameDocument, String> {
 
 }
