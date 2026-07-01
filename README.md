@@ -1,7 +1,3 @@
-This is an expanded and technically detailed **README.md** tailored for your project. It highlights the strategic use of **Hexagonal Architecture**, **Domain-Driven Design (DDD)**, and the specific functional capabilities of each API module.
-
----
-
 # 🃏 Blackjack API: Advanced Hexagonal Architecture & Hybrid Persistence
 
 ## 🎯 Project Overview
@@ -10,6 +6,63 @@ This project is a full-featured Blackjack game engine built with **Spring Boot 3
 The system utilizes a **Hybrid Persistence Strategy**:
 1.  **MongoDB**: Handles high-velocity, transient data (Ongoing games).
 2.  **MySQL**: Handles immutable historical records and relational statistics (Rankings and Profiles).
+
+---
+
+## 📜 Blackjack Rules Implemented
+This version of Blackjack follows these specific rules:
+*   **Initial Deal**: The player receives two cards; the dealer receives one face-up card.
+*   **Natural Blackjack**: If the player gets 21 with the first two cards, they win immediately (unless the dealer also has a chance for a draw).
+*   **Player Actions**:
+    *   **Hit**: Draw another card. If the total exceeds 21, the player "busts" and loses.
+    *   **Stand**: Keep the current total and end the turn.
+*   **Dealer Logic**: Once the player stands, the dealer draws cards until their hand value is at least 17.
+*   **Winning Conditions**: The side closer to 21 without exceeding it wins. A tie results in a "Push" (no one wins).
+
+---
+
+## 🛠️ Tech Stack
+*   **Language**: Java 17+
+*   **Framework**: Spring Boot 3.x
+*   **Databases**:
+    *   **MongoDB**: For high-performance storage of active games.
+    *   **MySQL 8.0**: For historical records and player statistics.
+*   **Architecture**: Hexagonal (Clean Architecture).
+*   **DevOps**: Docker, Docker Compose.
+*   **Documentation**: SpringDoc OpenAPI (Swagger UI).
+*   **Testing**: JUnit 5, Mockito, and **Testcontainers** (Real DB testing).
+*   **Communication**: Spring Application Events (Asynchronous).
+
+---
+
+## 🏗️ Project Structure
+The project follows **Hexagonal Architecture**, ensuring that business logic is isolated from external technologies:
+
+*   **Domain**: Contains Entities (Game, Player, Deck), Value Objects (Card, Suit, GameId), and Domain Services/Events.
+*   **Application**: Contains the Input Ports (Use Cases) and Output Ports (Repository Interfaces), along with their implementations (Services).
+*   **Infrastructure**:
+    *   **Web**: REST Controllers and DTOs.
+    *   **Persistence**: Repository implementations for both MongoDB and MySQL/JPA.
+    *   **Config**: Profiles and Bean definitions.
+
+---
+
+## 💾 Persistence Justification: Why MongoDB & MySQL?
+The project uses a **Hybrid Database** approach to optimize for different data lifecycles:
+
+1.  **MongoDB (Active Games)**:
+    *   *Reasoning*: Active games are volatile. They are created, updated frequently (every hit/stand), and deleted once finished. NoSQL provides the low latency and flexible schema needed for this high-frequency traffic.
+2.  **MySQL (Finished Games & Profiles)**:
+    *   *Reasoning*: Once a game is over, it becomes a permanent record. Relational databases are superior for complex queries, statistical reporting (rankings), and maintaining data integrity through foreign keys between games and player profiles.
+
+---
+
+## 🔄 Event-Driven Synchronization
+To decouple the "Active Game" logic from the "Statistics" logic, we implemented **Domain Events**:
+
+*   **GameFinishedEvent**: When a game reaches the `OVER` state (either by Stand, Bust, or Blackjack), a `GameFinishedEvent` is published.
+*   **Asynchronous Listener**: A `GameFinishedListener` catches this event using `@Async`.
+*   **Process**: It captures the final result, saves the game into the MySQL history, and updates the **PlayerProfile** (games played, won, and total score) in a single transaction.
 
 ---
 
@@ -91,7 +144,9 @@ The two persistence worlds are bridged by a **Domain Event System**:
 *   **Docker & Docker Compose**
 *   **Maven**
 
-### 1. Environment Configuration
+## ⚙️ Configuration & Installation
+
+### 1. Environment Variables
 Create a `.env` file in the root directory:
 ```env
 PROD_MYSQL_PORT=3308
@@ -106,13 +161,21 @@ MONGO_PROD_DB=blackjack_mongo
 APP_PORT=8080
 ```
 
-### 2. Running with Docker (Recommended)
+### 2. Execution Locally (IDE)
+1.  Start the databases: `docker compose up mysql-prod mongo-prod -d`.
+2.  Set the active Spring profile to `mongodb`.
+3.  Configure the environment variables in your IDE to match the `.env` file.
+4.  Run `BlackjackApplication.java`.
+
+### 3. Execution with Docker (Full Stack)
 ```bash
 mvn clean package -DskipTests
 docker compose up --build
 ```
 
-### 3. API Documentation (Swagger)
+---
+
+### 4. API Documentation (Swagger)
 Explore and test the API directly from your browser:
 👉 **[http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)**
 
