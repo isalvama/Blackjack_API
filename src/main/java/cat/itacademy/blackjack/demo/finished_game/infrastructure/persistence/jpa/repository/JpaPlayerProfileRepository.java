@@ -34,17 +34,21 @@ public class JpaPlayerProfileRepository implements PlayerProfilePort {
 
     @Override
     public PlayerProfile save(PlayerProfile playerProfile) {
-        JpaPlayerProfileEntity jpaPlayerProfileEntity =  jpaPlayerProfileSpringDataRepository.findById(playerProfile.getId())
-                .map(existing -> {
-                    existing.updateProfile(
-                            playerProfile.getNumberOfGamesPlayed(),
-                            playerProfile.getNumberOfGamesWon(),
-                            playerProfile.getScore()
-                    );
-                    return existing;
-                })
-                .orElseGet(() -> playerProfileMapper.toEntity(playerProfile));
-
+        JpaPlayerProfileEntity jpaPlayerProfileEntity;
+        if (playerProfile.getId() == null) {
+            jpaPlayerProfileEntity = playerProfileMapper.toEntity(playerProfile);
+        } else {
+            jpaPlayerProfileEntity = jpaPlayerProfileSpringDataRepository.findById(playerProfile.getId())
+                    .map(existing -> {
+                        existing.updateProfile(
+                                playerProfile.getNumberOfGamesPlayed(),
+                                playerProfile.getNumberOfGamesWon(),
+                                playerProfile.getScore()
+                        );
+                        return existing;
+                    })
+                    .orElseGet(() -> playerProfileMapper.toEntity(playerProfile));
+        }
         JpaPlayerProfileEntity savedEntity = jpaPlayerProfileSpringDataRepository.save(jpaPlayerProfileEntity);
         return playerProfileMapper.toDomain(savedEntity);
     }

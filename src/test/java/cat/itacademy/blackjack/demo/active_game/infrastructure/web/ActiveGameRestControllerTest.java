@@ -91,6 +91,10 @@ class ActiveGameRestControllerTest {
     @MockitoBean
     private StandUseCase standUseCase;
 
+    @MockitoBean
+    private DeleteUseCase deleteUseCase;
+
+
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();

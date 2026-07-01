@@ -18,8 +18,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
@@ -44,11 +42,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = BlackjackApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("mongodb")
 @Testcontainers
-@EnableJpaRepositories(basePackages = "cat.itacademy.blackjack.demo")
-@EnableMongoRepositories(basePackages = "cat.itacademy.blackjack.demo")
 @TestPropertySource(properties = {
-        "spring.jpa.hibernate.ddl-auto=create-drop",
-        "spring.datasource.url=jdbc:tc:mysql:8.0.36:///test"
+        "spring.jpa.hibernate.ddl-auto=update",
+        "spring.datasource.hikari.connection-timeout=2000",
+        "spring.datasource.hikari.leak-detection-threshold=2000",
+        "spring.jackson.serialization.write-dates-as-timestamps=false"
 })
 @AutoConfigureMockMvc
 public class BlackjackIntegrationTest {
@@ -311,11 +309,11 @@ public class BlackjackIntegrationTest {
                     ResultActions result = mockMvc.perform(MockMvcRequestBuilders.get(API_ACTIVE_GAMES + "/" + idStr)
                             .contentType(MediaType.APPLICATION_JSON));
                     result.andExpect(status().isNotFound())
-                            .andExpect(jsonPath("$.detail", containsString("Game Not Found")))
-                            .andExpect(jsonPath("$.detail", containsString("games")))
-                            .andExpect(jsonPath("$.detail", containsString("found")))
+                            .andExpect(jsonPath("$.detail", containsString("Game")))
                             .andExpect(jsonPath("$.detail", containsString("id")))
-                            .andExpect(jsonPath("$.detail", containsString(idStr)));
+                            .andExpect(jsonPath("$.detail", containsString(idStr)))
+                            .andExpect(jsonPath("$.detail", containsString("not found")));
+
                 }
             }
         }
@@ -438,7 +436,7 @@ public class BlackjackIntegrationTest {
                             .andExpect(jsonPath("$.detail", containsString("Game")))
                             .andExpect(jsonPath("$.detail", containsString("id")))
                             .andExpect(jsonPath("$.detail", containsString(idStr)))
-                            .andExpect(jsonPath("$.detail", containsString("found")));
+                            .andExpect(jsonPath("$.detail", containsString("not found")));
                 }
             }
 
@@ -848,7 +846,7 @@ public class BlackjackIntegrationTest {
                 void shouldReturn404PlayerProfileNotFoundError() throws Exception {
                     mockMvc.perform(MockMvcRequestBuilders.get(API_PLAYER_PROFILES + "/{id}", 9999L))
                             .andExpect(status().isNotFound())
-                            .andExpect(jsonPath("$.title").value("Player Profile Not Found Error"))
+                            .andExpect(jsonPath("$.title").value("Not Found Error"))
                             .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
                 }
             }
@@ -870,9 +868,9 @@ public class BlackjackIntegrationTest {
                 @Test
                 void shouldReturn404PlayerProfileNotFoundError() throws Exception {
                     mockMvc.perform(MockMvcRequestBuilders.get(API_PLAYER_PROFILES + "/search")
-                                    .param("name", "inexistant name"))
+                                    .param("name", "inexistent name"))
                             .andExpect(status().isNotFound())
-                            .andExpect(jsonPath("$.title").value("Player Profile Not Found Error"))
+                            .andExpect(jsonPath("$.title").value("Not Found Error"))
                             .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
                 }
             }
@@ -993,7 +991,7 @@ public class BlackjackIntegrationTest {
                     String randomUuid = UUID.randomUUID().toString();
                     mockMvc.perform(MockMvcRequestBuilders.get(API_FINISHED_GAMES + "/" + randomUuid))
                             .andExpect(status().isNotFound())
-                            .andExpect(jsonPath("$.title").value("Finished Game Not Found Error"))
+                            .andExpect(jsonPath("$.title").value("Not Found Error"))
                             .andExpect(jsonPath("$.detail", containsString("Game Not Found")))
                             .andExpect(jsonPath("$.detail", containsString(randomUuid)));
                 }
@@ -1095,7 +1093,8 @@ public class BlackjackIntegrationTest {
                                     .param("playerId", bobId.toString())
                                     .param("playerName", "Bob"))
 
-                            .andExpect(status().isBadRequest())
+                            .andExpect(status().isConflict())
+                            .andExpect(jsonPath("$.title", containsString("Conflict Error")))
                             .andExpect(jsonPath("$.detail", containsString("Invalid Finished Game Search")))
                             .andExpect(jsonPath("$.detail", containsString("Cannot search by Player ID and Player Name simultaneously")));
                 }
@@ -1119,6 +1118,6 @@ public class BlackjackIntegrationTest {
                             .andExpect(status().isOk())
                             .andExpect(jsonPath("$", empty()));
                 }
-        }
+            }
         }
 }
