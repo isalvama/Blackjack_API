@@ -1,11 +1,11 @@
 package cat.itacademy.blackjack.demo.active_game.domain.model;
 
-import cat.itacademy.blackjack.demo.common.domain.GameResult;
-import cat.itacademy.blackjack.demo.active_game.application.service.shuffle_strategy.ShuffleStrategy;
-import cat.itacademy.blackjack.demo.active_game.domain.GameState;
-import cat.itacademy.blackjack.demo.common.domain.exception.GameException;
-import cat.itacademy.blackjack.demo.active_game.domain.exception.InvalidGameException;
 import cat.itacademy.blackjack.demo.active_game.domain.exception.InvalidHitException;
+import cat.itacademy.blackjack.demo.common.domain.GameResult;
+import cat.itacademy.blackjack.demo.active_game.domain.shuffle_strategy.ShuffleStrategy;
+import cat.itacademy.blackjack.demo.active_game.domain.GameState;
+import cat.itacademy.blackjack.demo.active_game.domain.exception.ActiveGameException;
+import cat.itacademy.blackjack.demo.active_game.domain.exception.InvalidActiveGameException;
 import cat.itacademy.blackjack.demo.active_game.domain.value_object.Card;
 import cat.itacademy.blackjack.demo.common.domain.value_object.GameId;
 import cat.itacademy.blackjack.demo.active_game.domain.value_object.GameOutcome;
@@ -26,7 +26,7 @@ public class Game {
 
     private Game(GameId id, UserPlayer userPlayer, Dealer dealer, Deck deck) {
         if (deck.getCards().isEmpty()){
-            throw new InvalidGameException("deck's list of cards cannot be empty");
+            throw new InvalidActiveGameException("deck's list of cards cannot be empty");
         }
         this.id = validateNotNull(id, "id cannot be null");
         this.userPlayer = validateNotNull(userPlayer, "userPlayer cannot be null");
@@ -69,44 +69,31 @@ public class Game {
 
     public void start (ShuffleStrategy shuffleStrategy){
         if (gameState != GameState.STARTED){
-            throw new GameException("the Game cannot start over because it has already started");
+            throw new ActiveGameException("the Game cannot start over because it has already started");
         }
         this.deck.shuffle(shuffleStrategy);
         dealerHits();
         playerHits();
         playerHits();
         if (this.userPlayer.checkBlackjack()){
-            this.userPlayer.setCardsValueToTwentyOne();
-            dealerTurn();
+            dealerHits();
             setFinalGameResult(determineBlackjackWinner(), true);
             }
         }
 
-    public void dealerHits () {
-        ensureGameIsActiveAndDeckHasCards();
-        Card card = this.deck.draw();
-        this.dealer.hit(card);
-    }
-
-    public void hit (){
+    public void playerRequestedHit(){
+        ensureGameIsActive();
         playerHits();
-        if (this.userPlayer.canChangeAceValue()){
-            this.userPlayer.changeAceValueToOne();
-        }
         if (this.userPlayer.totalValueIsGreaterThan21()){
             setFinalGameResult(GameResult.DEALER_WIN, false);
         }
     }
 
     public void stand (){
+        ensureGameIsActive();
         dealerTurn();
         if (this.dealer.checkBlackjack()){
-            this.dealer.setCardsValueToTwentyOne();
             setFinalGameResult(GameResult.DEALER_WIN, true);
-            return;
-        }
-        if (this.dealer.canChangeAceValue()){
-            this.dealer.changeAceValueToOne();
             return;
         }
         if (this.dealer.totalValueIsGreaterThan21()){
@@ -117,21 +104,32 @@ public class Game {
     }
 
     private void playerHits (){
-        ensureGameIsActiveAndDeckHasCards();
+        ensureDeckHasCards();
+        if (gameState == GameState.OVER) return;
         Card card = this.deck.draw();
         this.userPlayer.hit(card);
     }
 
     private void dealerTurn(){
-        while (!this.dealer.shouldStand()){
+        while (!this.dealer.shouldStand() && this.gameState != GameState.OVER && !this.deck.hasNoCards() && !this.dealer.checkBlackjack()){
             dealerHits();
         }
     }
 
-    private void ensureGameIsActiveAndDeckHasCards(){
-        if (gameState == GameState.OVER){
+    public void dealerHits () {
+        ensureDeckHasCards();
+        if (gameState == GameState.OVER) return;
+        Card card = this.deck.draw();
+        this.dealer.hit(card);
+    }
+
+    private void ensureGameIsActive(){
+        if (gameState == GameState.OVER) {
             throw new InvalidHitException("the player cannot hit a new card because the game is already over");
         }
+    }
+
+    private void ensureDeckHasCards(){
         if (this.deck.hasNoCards()) {
             setFinalGameResult(determineWinner(), false);
         }
@@ -159,8 +157,6 @@ public class Game {
         }
     }
 
-
-
     private GameResult determineWinner(){
         int playerHandValue = this.userPlayer.getHandValue();
         int dealerHandValue = this.dealer.getHandValue();
@@ -176,7 +172,7 @@ public class Game {
 
     private static <T> T validateNotNull(T obj, String message) {
         if (obj == null)
-            throw new InvalidGameException(message);
+            throw new InvalidActiveGameException(message);
         return obj;
     }
 }

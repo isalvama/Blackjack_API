@@ -2,7 +2,7 @@ package cat.itacademy.blackjack.demo.active_game.domain.model;
 
 import cat.itacademy.blackjack.demo.active_game.domain.CardNumber;
 import cat.itacademy.blackjack.demo.active_game.domain.Suit;
-import cat.itacademy.blackjack.demo.active_game.domain.exception.InvalidGameException;
+import cat.itacademy.blackjack.demo.active_game.domain.exception.InvalidActiveGameException;
 import cat.itacademy.blackjack.demo.active_game.domain.exception.InvalidHandException;
 import cat.itacademy.blackjack.demo.active_game.domain.value_object.Card;
 import org.junit.jupiter.api.Test;
@@ -44,7 +44,9 @@ class HandTest {
     @Test
     void shouldAddCardAndAddToTotalValue() {
         Hand hand = Hand.create();
+
         hand.addCard(new Card(CardNumber.KING, Suit.DIAMONDS));
+
         assertFalse(hand.getCards().isEmpty());
         assertEquals(1, hand.getCards().size());
         assertEquals(hand.getCards(), List.of(new Card(CardNumber.KING, Suit.DIAMONDS)));
@@ -55,7 +57,7 @@ class HandTest {
     @Test
     void addCardThrowsExceptionIfCardIsNull() {
         Hand hand = Hand.create();
-        Exception exception = assertThrows(InvalidGameException.class, () -> {
+        Exception exception = assertThrows(InvalidActiveGameException.class, () -> {
                     hand.addCard(null);
                 }
         );
@@ -69,12 +71,56 @@ class HandTest {
         Card repeatedCard = new Card(CardNumber.ACE, Suit.DIAMONDS);
         List<Card> cards = List.of(repeatedCard);
         Hand hand = Hand.reconstitute(cards, 1);
-        Exception exception = assertThrows(InvalidGameException.class, () -> {
+        Exception exception = assertThrows(InvalidActiveGameException.class, () -> {
                     hand.addCard(repeatedCard);
                 }
         );
         assertTrue(exception.getMessage().contains("Invalid Game"));
         assertTrue(exception.getMessage().contains("repeated card"));
+    }
+
+    @Test
+    void addCardAddsCardinCardsAndIncrementsTotalValueByCardNumberValue() {
+        Card card = new Card(CardNumber.SIX, Suit.DIAMONDS);
+        Hand hand = Hand.create();
+
+        hand.addCard(card);
+
+        assertEquals(1, hand.getCards().size());
+        assertEquals(card.cardNumber().getValue(), hand.getTotalValue());
+    }
+
+    @Test
+    void addCardWhenBlackjackSetsTotalValueTo21() {
+        Card queenCard = new Card(CardNumber.QUEEN, Suit.DIAMONDS);
+        Card aceCard = new Card(CardNumber.ACE, Suit.DIAMONDS);
+
+        Hand hand = Hand.create();
+
+        hand.addCard(queenCard);
+        hand.addCard(aceCard);
+
+        assertEquals(2, hand.getCards().size());
+        assertEquals(21, hand.getTotalValue());
+    }
+
+    @Test
+    void addCardWhenBustsAceValueTurns1() {
+        Card queenCard = new Card(CardNumber.THREE, Suit.DIAMONDS);
+        Card aceCard = new Card(CardNumber.ACE, Suit.DIAMONDS);
+        Card nineCard = new Card(CardNumber.NINE, Suit.DIAMONDS);
+        Hand hand = Hand.create();
+
+        hand.addCard(queenCard);
+        hand.addCard(aceCard);
+
+        assertEquals(2, hand.getCards().size());
+        assertEquals(14, hand.getTotalValue());
+
+        hand.addCard(nineCard);
+
+        assertEquals(3, hand.getCards().size());
+        assertEquals(13, hand.getTotalValue());
     }
 
     @Test

@@ -1,14 +1,11 @@
 package cat.itacademy.blackjack.demo.active_game.infrastructure.web;
 
-import cat.itacademy.blackjack.demo.active_game.application.port.in.CreateGameUseCase;
-import cat.itacademy.blackjack.demo.active_game.application.port.in.GetActiveGameUseCase;
-import cat.itacademy.blackjack.demo.active_game.application.port.in.HitUseCase;
-import cat.itacademy.blackjack.demo.active_game.application.port.in.StandUseCase;
+import cat.itacademy.blackjack.demo.active_game.application.port.in.*;
 import cat.itacademy.blackjack.demo.active_game.domain.GameState;
-import cat.itacademy.blackjack.demo.active_game.domain.exception.GameNotFoundException;
+import cat.itacademy.blackjack.demo.active_game.application.exception.ActiveGameNotFoundException;
 import cat.itacademy.blackjack.demo.active_game.infrastructure.web.dto.CardDto;
 import cat.itacademy.blackjack.demo.active_game.infrastructure.web.dto.CreateGameDto;
-import cat.itacademy.blackjack.demo.active_game.infrastructure.web.dto.GameResponseDto;
+import cat.itacademy.blackjack.demo.active_game.infrastructure.web.dto.ActiveGameResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,7 +39,7 @@ class ActiveGameRestControllerTest {
     private static final String NAME = "Player Name";
     private static String GAME_STATE_STARTED = GameState.STARTED.toString();
     private static String GAME_STATE_OVER = GameState.OVER.toString();
-    private static final GameResponseDto GAME_RESPONSE_DTO_STARTED = new GameResponseDto(
+    private static final ActiveGameResponseDto GAME_RESPONSE_DTO_STARTED = new ActiveGameResponseDto(
             ID,
             LocalDateTime.now(),
             LocalDateTime.now(),
@@ -57,7 +54,7 @@ class ActiveGameRestControllerTest {
             null
     );
 
-    private static final GameResponseDto GAME_RESPONSE_DTO_OVER = new GameResponseDto(
+    private static final ActiveGameResponseDto GAME_RESPONSE_DTO_OVER = new ActiveGameResponseDto(
             ID,
             LocalDateTime.now(),
             LocalDateTime.now(),
@@ -86,10 +83,17 @@ class ActiveGameRestControllerTest {
     private GetActiveGameUseCase getActiveGameUseCase;
 
     @MockitoBean
+    private GetAllActiveGamesUseCase getAllActiveGamesUseCase;
+
+    @MockitoBean
     private HitUseCase hitUseCase;
 
     @MockitoBean
     private StandUseCase standUseCase;
+
+    @MockitoBean
+    private DeleteUseCase deleteUseCase;
+
 
     @BeforeEach
     void setUp() {
@@ -97,7 +101,7 @@ class ActiveGameRestControllerTest {
     }
 
     @Nested
-    @DisplayName("PUT /api/blackjack")
+    @DisplayName("PUT " + API_URL)
     class CreateNewGame {
 
         @Test
@@ -112,7 +116,7 @@ class ActiveGameRestControllerTest {
                     .content(objectMapper.writeValueAsString(createGameDto)));
 
             result.andExpect(status().isCreated())
-                    .andExpect(header().string("Location", containsString("/api/blackjack/" + ID)))
+                    .andExpect(header().string("Location", containsString(API_URL + "/" + ID)))
                     .andExpect(jsonPath("$.id").exists())
                     .andExpect(jsonPath("$.createdAt").exists())
                     .andExpect(jsonPath("$.lastTimePlayedAt").exists())
@@ -159,7 +163,7 @@ class ActiveGameRestControllerTest {
     }
 
     @Nested
-    @DisplayName("GET /api/blackjack")
+    @DisplayName("GET " + API_URL)
     class GetActiveGameState {
 
         @Test
@@ -202,7 +206,7 @@ class ActiveGameRestControllerTest {
         @Test
         void shouldReturn404NotFound() throws Exception {
 
-            when(getActiveGameUseCase.execute(ID)).thenThrow(new GameNotFoundException(ID));
+            when(getActiveGameUseCase.execute(ID)).thenThrow(new ActiveGameNotFoundException(ID));
 
             ResultActions result = mockMvc.perform(MockMvcRequestBuilders.get(API_URL + "/" + ID)
                     .contentType(MediaType.APPLICATION_JSON));
@@ -215,7 +219,7 @@ class ActiveGameRestControllerTest {
         }
     }
     @Nested
-    @DisplayName("POST /api/blackjack/{id}/hit")
+    @DisplayName("POST " + API_URL)
     class Hit {
 
         @Test
@@ -228,13 +232,13 @@ class ActiveGameRestControllerTest {
             result.andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.title", Matchers.containsString("Validation Error in Parameter")));
 
-            verifyNoInteractions(standUseCase);
+            verifyNoInteractions(hitUseCase);
         }
 
         @Test
         void shouldReturnActiveGameInfoData() throws Exception {
 
-            when(standUseCase.execute(ID)).thenReturn(GAME_RESPONSE_DTO_STARTED);
+            when(hitUseCase.execute(ID)).thenReturn(GAME_RESPONSE_DTO_STARTED);
 
             ResultActions result = mockMvc.perform(MockMvcRequestBuilders.post(API_URL + "/" + ID + "/hit")
                     .contentType(MediaType.APPLICATION_JSON));
@@ -258,7 +262,7 @@ class ActiveGameRestControllerTest {
         @Test
         void shouldReturn404NotFound() throws Exception {
 
-            when(hitUseCase.execute(ID)).thenThrow(new GameNotFoundException(ID));
+            when(hitUseCase.execute(ID)).thenThrow(new ActiveGameNotFoundException(ID));
 
             ResultActions result = mockMvc.perform(MockMvcRequestBuilders.post(API_URL + "/" + ID + "/hit")
                     .contentType(MediaType.APPLICATION_JSON));
@@ -268,11 +272,13 @@ class ActiveGameRestControllerTest {
                     .andExpect(jsonPath("$.detail", containsString("not")))
                     .andExpect(jsonPath("$.detail", containsString("found")))
                     .andExpect(jsonPath("$.detail", containsString(ID)));
+
+            verify(hitUseCase, times(1)).execute(ID);
         }
     }
 
     @Nested
-    @DisplayName("POST /api/blackjack/{id}/stand")
+    @DisplayName("POST " + API_URL + "/{id}/stand")
     class Stand {
 
         @Test
@@ -317,7 +323,7 @@ class ActiveGameRestControllerTest {
         @Test
         void shouldReturn404NotFound() throws Exception {
 
-            when(standUseCase.execute(ID)).thenThrow(new GameNotFoundException(ID));
+            when(standUseCase.execute(ID)).thenThrow(new ActiveGameNotFoundException(ID));
 
             ResultActions result = mockMvc.perform(MockMvcRequestBuilders.post(API_URL + "/" + ID + "/stand")
                     .contentType(MediaType.APPLICATION_JSON));
@@ -329,8 +335,4 @@ class ActiveGameRestControllerTest {
                     .andExpect(jsonPath("$.detail", containsString(ID)));
         }
     }
-
-    // TODO BlackjackException
-    // TODO EntityConflictException
-    // TODO DomainException
 }

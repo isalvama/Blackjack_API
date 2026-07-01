@@ -4,12 +4,12 @@ import cat.itacademy.blackjack.demo.common.domain.value_object.GameId;
 import cat.itacademy.blackjack.demo.common.domain.value_object.Name;
 import cat.itacademy.blackjack.demo.active_game.application.port.out.ActiveGamePort;
 import cat.itacademy.blackjack.demo.active_game.domain.GameState;
-import cat.itacademy.blackjack.demo.active_game.domain.exception.GameNotFoundException;
+import cat.itacademy.blackjack.demo.active_game.application.exception.ActiveGameNotFoundException;
 import cat.itacademy.blackjack.demo.active_game.domain.model.Dealer;
 import cat.itacademy.blackjack.demo.active_game.domain.model.Deck;
 import cat.itacademy.blackjack.demo.active_game.domain.model.Game;
 import cat.itacademy.blackjack.demo.active_game.domain.model.UserPlayer;
-import cat.itacademy.blackjack.demo.active_game.infrastructure.web.dto.GameResponseDto;
+import cat.itacademy.blackjack.demo.active_game.infrastructure.web.dto.ActiveGameResponseDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -41,12 +41,12 @@ class GetActiveGameServiceTest {
         UserPlayer userPlayer = UserPlayer.create(Name.of(name));
         Game game = Game.reconstitute(GAME_ID, GameState.STARTED, userPlayer, Dealer.create(), Deck.create(), LocalDateTime.now(), LocalDateTime.now());
         game.dealerHits();
-        game.hit();
-        game.hit();
+        game.playerRequestedHit();
+        game.playerRequestedHit();
 
         when(activeGamePort.getActiveGame(GAME_ID)).thenReturn(Optional.of(game));
 
-        GameResponseDto gameResponseDto = getActiveGameService.execute(ID);
+        ActiveGameResponseDto gameResponseDto = getActiveGameService.execute(ID);
 
         assertEquals(gameResponseDto.id(), ID);
         assertNotNull(gameResponseDto.createdAt());
@@ -67,7 +67,7 @@ class GetActiveGameServiceTest {
 
         when(activeGamePort.getActiveGame(GAME_ID)).thenReturn(Optional.empty());
 
-        Exception exception = assertThrows(GameNotFoundException.class, () -> {getActiveGameService.execute(ID);});
+        Exception exception = assertThrows(ActiveGameNotFoundException.class, () -> {getActiveGameService.execute(ID);});
 
         assertTrue(exception.getMessage().contains("Game"));
         assertTrue(exception.getMessage().contains("not"));

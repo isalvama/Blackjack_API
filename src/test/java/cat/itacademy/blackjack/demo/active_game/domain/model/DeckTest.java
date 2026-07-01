@@ -31,10 +31,6 @@ class DeckTest {
     }
 
     @Test
-    void create() {
-    }
-
-    @Test
     void shouldCreateANewDeckFromListOfCards() {
         Card card = new Card(CardNumber.ACE, Suit.CLUBS);
         List<Card> cards = List.of(card);

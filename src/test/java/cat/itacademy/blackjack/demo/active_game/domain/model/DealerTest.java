@@ -24,16 +24,16 @@ class DealerTest {
 
     @Test
     void shouldNotStandBelow17() {
-        DEALER.hit(new Card(CardNumber.TEN, Suit.CLUBS)); // 10
-        DEALER.hit(new Card(CardNumber.SIX, Suit.CLUBS)); // 16
+        DEALER.hit(new Card(CardNumber.NINE, Suit.CLUBS));
+        DEALER.hit(new Card(CardNumber.SIX, Suit.CLUBS));
 
         assertThat(DEALER.shouldStand()).isFalse();
     }
 
     @Test
     void shouldStandAt17() {
-        DEALER.hit(new Card(CardNumber.TEN, Suit.CLUBS)); // 10
-        DEALER.hit(new Card(CardNumber.SEVEN, Suit.CLUBS)); // 17
+        DEALER.hit(new Card(CardNumber.TEN, Suit.CLUBS));
+        DEALER.hit(new Card(CardNumber.SEVEN, Suit.CLUBS));
 
         assertThat(DEALER.shouldStand()).isTrue();
     }

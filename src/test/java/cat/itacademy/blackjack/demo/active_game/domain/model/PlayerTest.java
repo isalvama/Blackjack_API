@@ -2,7 +2,7 @@ package cat.itacademy.blackjack.demo.active_game.domain.model;
 
 import cat.itacademy.blackjack.demo.active_game.domain.CardNumber;
 import cat.itacademy.blackjack.demo.active_game.domain.Suit;
-import cat.itacademy.blackjack.demo.active_game.domain.exception.InvalidGameException;
+import cat.itacademy.blackjack.demo.active_game.domain.exception.InvalidActiveGameException;
 import cat.itacademy.blackjack.demo.active_game.domain.exception.InvalidPlayerException;
 import cat.itacademy.blackjack.demo.active_game.domain.value_object.Card;
 import org.junit.jupiter.api.Test;
@@ -29,7 +29,7 @@ class PlayerTest {
     void shouldThrowInvalidGameExceptionWhenHitNullCard() {
         Player player = new TestPlayer(Hand.reconstitute(new ArrayList<>(), 0));
         assertThatThrownBy(() -> player.hit(null))
-                .isInstanceOf(InvalidGameException.class);
+                .isInstanceOf(InvalidActiveGameException.class);
     }
 
     @Test

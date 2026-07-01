@@ -36,11 +36,6 @@ public class JpaFinishedGameRepository implements FinishedGamePort {
     }
 
     @Override
-    public Integer countGames() {
-        return Math.toIntExact(jpaGameSpringDataRepository.count());
-    }
-
-    @Override
     public List<FinishedGame> getByCriteria(FinishedGameSortCriteria criteria) {
         Sort sort = Sort.by(
                 Sort.Direction.valueOf(criteria.sortType().getOrderType().name()),

@@ -120,7 +120,7 @@ class FinishedGamesRestControllerTest {
                             .param("playerId", Long.toString(playerId))
                             .param("playerName", playerName)
                             .param("sort", "SCORE_DESC"))
-                    .andExpect(status().isBadRequest());
+                    .andExpect(status().isConflict());
 
             verify(getFinishedGamesUseCase, never()).execute(any());
         }

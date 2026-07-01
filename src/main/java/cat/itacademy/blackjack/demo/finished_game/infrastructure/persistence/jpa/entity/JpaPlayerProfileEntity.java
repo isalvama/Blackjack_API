@@ -30,4 +30,10 @@ public class JpaPlayerProfileEntity {
 
         @Column(nullable = false)
         private Long score;
+
+        public void updateProfile(Long totalGamesPlayed, Long numberOfGamesWon, Long score) {
+                this.totalGamesPlayed = totalGamesPlayed;
+                this.numberOfGamesWon = numberOfGamesWon;
+                this.score = score;
+        }
 }

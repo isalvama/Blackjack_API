@@ -8,16 +8,16 @@ import cat.itacademy.blackjack.demo.active_game.domain.event.GameFinishedEvent;
 import cat.itacademy.blackjack.demo.active_game.domain.event.GameFinishedEventPublisher;
 import cat.itacademy.blackjack.demo.active_game.domain.model.Game;
 import cat.itacademy.blackjack.demo.active_game.domain.value_object.Card;
-import cat.itacademy.blackjack.demo.active_game.infrastructure.web.dto.GameResponseDto;
+import cat.itacademy.blackjack.demo.active_game.infrastructure.web.dto.ActiveGameResponseDto;
 import cat.itacademy.blackjack.demo.shuffle_strategy.TieWithBlackjackShuffleStrategy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.AdditionalAnswers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -51,15 +51,9 @@ class CreateGameServiceTest {
         @DisplayName("Should save game and return DTO when game starts normally and is not over")
         void execute_Success() {
 
-            Game mockSavedGame = mock(Game.class);
-            LocalDateTime now = LocalDateTime.now();
+            when(gamePort.saveActiveGame(any(Game.class))).thenAnswer(AdditionalAnswers.returnsFirstArg());
 
-            when(mockSavedGame.getCreatedAt()).thenReturn(now);
-            when(mockSavedGame.getLastTimePlayedAt()).thenReturn(now);
-
-            when(gamePort.saveActiveGame(any(Game.class))).thenReturn(mockSavedGame);
-
-            GameResponseDto result = createGameService.execute(PLAYER_NAME);
+            ActiveGameResponseDto result = createGameService.execute(PLAYER_NAME);
 
             assertThat(result).isNotNull();
             assertNotNull(result.id());
@@ -83,8 +77,6 @@ class CreateGameServiceTest {
         @Test
         @DisplayName("Should publish event when game is OVER (immediate Blackjack)")
         void execute_GameOverImmediate() {
-            LocalDateTime now = LocalDateTime.now();
-
             when(shuffleStrategy.shuffle(any())).thenAnswer(invocation -> {
                 List<Card> cards = invocation.getArgument(0);
                 TieWithBlackjackShuffleStrategy tieWithBlackjackShuffleStrategy = new TieWithBlackjackShuffleStrategy();
@@ -92,20 +84,14 @@ class CreateGameServiceTest {
                 return cards;
             });
 
-            when(gamePort.saveActiveGame(any(Game.class))).thenAnswer(invocation -> {
-                Game gameArg = invocation.getArgument(0);
-                gameArg.updateAuditInfo(now, now);
-                return gameArg;
-            });
-
-            GameResponseDto result = createGameService.execute(PLAYER_NAME);
+            ActiveGameResponseDto result = createGameService.execute(PLAYER_NAME);
 
             assertThat(result).isNotNull();
             assertNotNull(result.id());
             assertTrue(result.createdAt().isBefore(LocalDateTime.now()));
             assertTrue(result.lastTimePlayedAt().isBefore(LocalDateTime.now()));
             assertEquals(result.username(), PLAYER_NAME);
-            assertEquals(11, result.playerTotalCardsValue());
+            assertEquals(21, result.playerTotalCardsValue());
             assertEquals(2, result.playerHand().size());
             assertNotNull(result.dealerFirstCard());
             assertEquals(GameState.OVER.name(), result.gameState());
@@ -113,7 +99,7 @@ class CreateGameServiceTest {
             assertTrue(result.finishedWithBlackjack());
 
 
-            verify(gamePort, times(1)).saveActiveGame(any(Game.class));
+            verify(gamePort, never()).saveActiveGame(any(Game.class));
             verify(eventPublisher, times(1)).publishEvent(any(GameFinishedEvent.class));
         }
     }

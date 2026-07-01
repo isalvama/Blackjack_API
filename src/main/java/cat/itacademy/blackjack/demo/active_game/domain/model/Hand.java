@@ -1,6 +1,6 @@
 package cat.itacademy.blackjack.demo.active_game.domain.model;
 import cat.itacademy.blackjack.demo.active_game.domain.CardNumber;
-import cat.itacademy.blackjack.demo.active_game.domain.exception.InvalidGameException;
+import cat.itacademy.blackjack.demo.active_game.domain.exception.InvalidActiveGameException;
 import cat.itacademy.blackjack.demo.active_game.domain.exception.InvalidHandException;
 import cat.itacademy.blackjack.demo.active_game.domain.value_object.Card;
 import lombok.Getter;
@@ -38,15 +38,30 @@ public class Hand {
         );
     }
 
-     void addCard (Card card){
-        if (card == null){
-            throw new InvalidGameException("card to hit cannot be null");
+    void addCard (Card card){
+        ensureCardIsValid(card);
+        this.cards.add(card);
+        updateTotalValue(card);
+    }
+
+    private void updateTotalValue(Card card){
+        if (this.isBlackjack()) {
+            this.setCardsValueToTwentyOne();
+            return;
         }
+        this.totalValue += card.cardNumber().getValue();
+        if (this.valueIsGreaterThan21() && this.hasAce()) {
+            this.changeAceValueToOne();
+        }
+    }
+
+    private void ensureCardIsValid(Card card){
+        if (card == null){
+            throw new InvalidActiveGameException("card to hit cannot be null");
+        }
+
         if (this.cards.contains(card)) {
-            throw new InvalidGameException("a player cannot take a repeated card");
-        } else {
-            this.cards.add(card);
-            this.totalValue += card.cardNumber().getValue();
+            throw new InvalidActiveGameException("a player cannot take a repeated card");
         }
     }
 

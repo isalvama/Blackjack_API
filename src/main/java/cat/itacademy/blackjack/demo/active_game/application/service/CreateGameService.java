@@ -11,7 +11,7 @@ import cat.itacademy.blackjack.demo.active_game.domain.model.Game;
 import cat.itacademy.blackjack.demo.common.domain.value_object.Name;
 import cat.itacademy.blackjack.demo.active_game.domain.model.UserPlayer;
 import cat.itacademy.blackjack.demo.active_game.domain.event.GameFinishedEvent;
-import cat.itacademy.blackjack.demo.active_game.infrastructure.web.dto.GameResponseDto;
+import cat.itacademy.blackjack.demo.active_game.infrastructure.web.dto.ActiveGameResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,18 +25,17 @@ public class CreateGameService implements CreateGameUseCase {
     private final ShuffleStrategy shuffleStrategy;
 
     @Override
-    public GameResponseDto execute(String name) {
+    public ActiveGameResponseDto execute(String name) {
         UserPlayer player = UserPlayer.create(Name.of(name));
         Game game = Game.create(player, Dealer.create(), Deck.create());
         game.start(shuffleStrategy);
         game.updateAuditInfo(LocalDateTime.now(), LocalDateTime.now());
 
         if (game.getGameState() == GameState.OVER){
-            gamePort.deleteActiveGame(game.getId());
             eventPublisher.publishEvent(GameFinishedEvent.from(game));
         } else {
             game = gamePort.saveActiveGame(game);
         }
-        return GameResponseDto.from(game);
+        return ActiveGameResponseDto.from(game);
     }
 }

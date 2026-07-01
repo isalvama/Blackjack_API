@@ -8,13 +8,13 @@ import cat.itacademy.blackjack.demo.active_game.domain.shuffle_strategy.ShuffleS
 import cat.itacademy.blackjack.demo.active_game.domain.GameState;
 import cat.itacademy.blackjack.demo.active_game.domain.event.GameFinishedEvent;
 import cat.itacademy.blackjack.demo.active_game.domain.event.GameFinishedEventPublisher;
-import cat.itacademy.blackjack.demo.active_game.domain.exception.GameNotFoundException;
+import cat.itacademy.blackjack.demo.active_game.application.exception.ActiveGameNotFoundException;
 import cat.itacademy.blackjack.demo.active_game.domain.model.Dealer;
 import cat.itacademy.blackjack.demo.active_game.domain.model.Deck;
 import cat.itacademy.blackjack.demo.active_game.domain.model.Game;
 import cat.itacademy.blackjack.demo.active_game.domain.model.UserPlayer;
 import cat.itacademy.blackjack.demo.active_game.domain.value_object.Card;
-import cat.itacademy.blackjack.demo.active_game.infrastructure.web.dto.GameResponseDto;
+import cat.itacademy.blackjack.demo.active_game.infrastructure.web.dto.ActiveGameResponseDto;
 import cat.itacademy.blackjack.demo.shuffle_strategy.GameWithoutBlackJackStrategy;
 import cat.itacademy.blackjack.demo.shuffle_strategy.PlayerLosingByExceeding21Strategy;
 import org.junit.jupiter.api.DisplayName;
@@ -78,7 +78,7 @@ class HitServiceTest {
 
             when(gamePort.saveActiveGame(any(Game.class))).thenAnswer(AdditionalAnswers.returnsFirstArg());
 
-            GameResponseDto result = hitService.execute(ID);
+            ActiveGameResponseDto result = hitService.execute(ID);
 
             assertThat(result).isNotNull();
             assertNotNull(result.id());
@@ -115,7 +115,7 @@ class HitServiceTest {
 
             when(gamePort.getActiveGame(GAME_ID)).thenReturn(Optional.of(gameReconstituted));
 
-            GameResponseDto result = hitService.execute(ID);
+            ActiveGameResponseDto result = hitService.execute(ID);
 
             assertThat(result).isNotNull();
             assertEquals(result.username(), name);
@@ -134,7 +134,7 @@ class HitServiceTest {
 
         when(gamePort.getActiveGame(any(GameId.class))).thenReturn(Optional.empty());
 
-        Exception exception = assertThrows(GameNotFoundException.class, () -> {hitService.execute(ID);});
+        Exception exception = assertThrows(ActiveGameNotFoundException.class, () -> {hitService.execute(ID);});
 
         assertTrue(exception.getMessage().contains("Game"));
         assertTrue(exception.getMessage().contains("not"));

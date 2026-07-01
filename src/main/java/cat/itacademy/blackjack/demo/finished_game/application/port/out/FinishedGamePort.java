@@ -13,7 +13,4 @@ public interface FinishedGamePort {
     Optional<FinishedGame> findById(GameId id);
 
     List<FinishedGame> getByCriteria(FinishedGameSortCriteria criteria);
-
-    Integer countGames();
-
 }

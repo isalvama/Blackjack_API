@@ -60,7 +60,7 @@ public class JpaFinishedGameEntity {
     private LocalDateTime finishedAt;
 
     @PrePersist
-    protected void onUpdate() {
+    protected void onCreate() {
         if (this.finishedAt == null) {
             this.finishedAt = LocalDateTime.now();
         }

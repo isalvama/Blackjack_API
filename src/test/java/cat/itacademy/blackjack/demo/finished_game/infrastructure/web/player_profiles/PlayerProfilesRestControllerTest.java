@@ -60,7 +60,7 @@ class PlayerProfilesRestControllerTest {
 
         mockMvc.perform(get("/api/player-profiles/{id}", playerId))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.title").value("Player Profile Not Found Error"))
+                .andExpect(jsonPath("$.title").value("Not Found Error"))
                 .andExpect(jsonPath("$.detail", containsString("Player not found with id")))
                 .andExpect(jsonPath("$.detail", containsString("99")));
 
