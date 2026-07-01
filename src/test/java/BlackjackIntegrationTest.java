@@ -81,7 +81,7 @@ public class BlackjackIntegrationTest {
 
     @Nested
     @DisplayName(API_ACTIVE_GAMES)
-    class ActiveGameRestController {
+    class ActiveGame {
 
         @Nested
         @DisplayName("POST " + API_ACTIVE_GAMES)
@@ -264,37 +264,43 @@ public class BlackjackIntegrationTest {
             @Nested
             @DisplayName("GET " + API_ACTIVE_GAMES + "/{id}")
             class GetActiveGameState {
+                @Nested
+                @Import(GameWithoutBlackJackStrategyConfig.class)
+                class GameStartedAndNotFinished {
 
-                @DisplayName("should return 200 with information about the state of the game")
-                @Test
-                void shouldGetInfoAboutTheStateOfTheGameCreated() throws Exception {
-                    CreateGameDto createGameDto = new CreateGameDto(NAME);
+                    @Autowired
+                    private MockMvc mockMvc;
 
-                    ResultActions resultCreate = mockMvc.perform(MockMvcRequestBuilders.post(API_ACTIVE_GAMES)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(createGameDto)));
+                    @DisplayName("should return 200 with information about the state of the game")
+                    @Test
+                    void shouldGetInfoAboutTheStateOfTheGameCreated() throws Exception {
+                        CreateGameDto createGameDto = new CreateGameDto(NAME);
 
-                    String resultAsString = resultCreate.andReturn().getResponse().getContentAsString();
-                    String idFromJson = com.jayway.jsonpath.JsonPath.read(resultAsString, "$.id");
+                        ResultActions resultCreate = mockMvc.perform(MockMvcRequestBuilders.post(API_ACTIVE_GAMES)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(createGameDto)));
 
-                    ResultActions result = mockMvc.perform(MockMvcRequestBuilders.get(API_ACTIVE_GAMES + "/" + idFromJson)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(createGameDto)));
+                        String resultAsString = resultCreate.andReturn().getResponse().getContentAsString();
+                        String idFromJson = com.jayway.jsonpath.JsonPath.read(resultAsString, "$.id");
 
-                    result.andExpect(status().isOk())
-                            .andExpect(jsonPath("$.id").value(idFromJson))
-                            .andExpect(jsonPath("$.createdAt").exists())
-                            .andExpect(jsonPath("$.lastTimePlayedAt").exists())
-                            .andExpect(jsonPath("$.username").value(NAME))
-                            .andExpect(jsonPath("$.playerTotalCardsValue").isNumber())
-                            .andExpect(jsonPath("$.playerHand", hasSize(2)))
-                            .andExpect(jsonPath("$.dealerFirstCard").exists());
+                        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.get(API_ACTIVE_GAMES + "/" + idFromJson)
+                                .contentType(MediaType.APPLICATION_JSON));
 
-                    await().atMost(5, SECONDS).untilAsserted(() -> {
-                        mockMvc.perform(MockMvcRequestBuilders.get(API_FINISHED_GAMES + "/" + idFromJson)
-                                        .contentType(MediaType.APPLICATION_JSON))
-                                .andExpect(status().isNotFound());
-                    });
+                        result.andExpect(status().isOk())
+                                .andExpect(jsonPath("$.id").value(idFromJson))
+                                .andExpect(jsonPath("$.createdAt").exists())
+                                .andExpect(jsonPath("$.lastTimePlayedAt").exists())
+                                .andExpect(jsonPath("$.username").value(NAME))
+                                .andExpect(jsonPath("$.playerTotalCardsValue").isNumber())
+                                .andExpect(jsonPath("$.playerHand", hasSize(2)))
+                                .andExpect(jsonPath("$.dealerFirstCard").exists());
+
+                        await().atMost(5, SECONDS).untilAsserted(() -> {
+                            mockMvc.perform(MockMvcRequestBuilders.get(API_FINISHED_GAMES + "/" + idFromJson)
+                                            .contentType(MediaType.APPLICATION_JSON))
+                                    .andExpect(status().isNotFound());
+                        });
+                    }
                 }
 
                 @DisplayName("should return 404 Game Not Found when the game requested does not exist")
@@ -312,6 +318,7 @@ public class BlackjackIntegrationTest {
                             .andExpect(jsonPath("$.detail", containsString(idStr)));
                 }
             }
+        }
 
             @Nested
             @DisplayName("POST " + API_ACTIVE_GAMES + "/{id}/hit")
@@ -754,6 +761,58 @@ public class BlackjackIntegrationTest {
                             .andExpect(jsonPath("$[1].id").doesNotExist());
                 }
             }
+            @Nested
+            @DisplayName("DELETE " + API_ACTIVE_GAMES)
+            class DeleteGame {
+
+                @Nested
+                @Import(GameWithoutBlackJackStrategyConfig.class)
+                class GameStartedWithoutBlackJack {
+
+                    @Autowired
+                    private MockMvc mockMvc;
+
+                    @DisplayName("should delete game started")
+                    @Test
+                    void shouldDeleteGameStarted() throws Exception {
+                        CreateGameDto createGameDto = new CreateGameDto(NAME);
+
+                        ResultActions resultCreate = mockMvc.perform(MockMvcRequestBuilders.post(API_ACTIVE_GAMES)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(createGameDto)))
+                                .andExpect(status().isCreated())
+                                .andExpect(header().string("Location", containsString(API_ACTIVE_GAMES + "/")))
+                                .andExpect(jsonPath("$.id").exists())
+                                .andExpect(jsonPath("$.username").value(NAME))
+                                .andExpect(jsonPath("$.gameState").value("STARTED"))
+                                .andExpect(jsonPath("$.gameResult", anyOf(is(nullValue()))))
+                                .andExpect(jsonPath("$.finishedWithBlackjack", anyOf(is(nullValue()))));
+
+                        String resultAsString = resultCreate.andReturn().getResponse().getContentAsString();
+                        String idFromJson = com.jayway.jsonpath.JsonPath.read(resultAsString, "$.id");
+
+                        ResultActions resultBeforeDelete = mockMvc.perform(MockMvcRequestBuilders.get(API_ACTIVE_GAMES)
+                                .contentType(MediaType.APPLICATION_JSON));
+
+                        resultBeforeDelete.andExpect(status().isOk())
+                                .andExpect(jsonPath("$", hasSize(1)))
+                                .andExpect(jsonPath("$[0].id").value(idFromJson))
+                                .andExpect(jsonPath("$[0].username").value(NAME));
+
+                        mockMvc.perform(MockMvcRequestBuilders.delete(API_ACTIVE_GAMES + "/" + idFromJson)
+                                .contentType(MediaType.APPLICATION_JSON));
+
+
+                        ResultActions resultAfterDelete = mockMvc.perform(MockMvcRequestBuilders.get(API_ACTIVE_GAMES)
+                                .contentType(MediaType.APPLICATION_JSON));
+
+                        resultAfterDelete.andExpect(status().isOk())
+                                .andExpect(jsonPath("$", hasSize(0)))
+                                .andExpect(jsonPath("$[0].id").doesNotExist());
+
+                    }
+                }
+            }
         }
 
         @Nested
@@ -1060,7 +1119,6 @@ public class BlackjackIntegrationTest {
                             .andExpect(status().isOk())
                             .andExpect(jsonPath("$", empty()));
                 }
-            }
         }
-    }
+        }
 }
