@@ -2,6 +2,11 @@ package cat.itacademy.blackjack.demo.active_game.domain.model;
 
 import cat.itacademy.blackjack.demo.active_game.domain.exception.InvalidHitException;
 import cat.itacademy.blackjack.demo.common.domain.value_object.GameId;
+import cat.itacademy.blackjack.demo.common.domain.value_object.Name;
+import cat.itacademy.blackjack.demo.shuffle_strategy.GameWithoutBlackJackStrategy;
+import cat.itacademy.blackjack.demo.shuffle_strategy.TieWithBlackjackShuffleStrategy;
+import cat.itacademy.blackjack.demo.shuffle_strategy.TieWithoutBlackJackStrategy;
+import cat.itacademy.blackjack.demo.shuffle_strategy.UserWinningWithBlackjackShuffleStrategy;
 import org.junit.jupiter.api.*;
 
 import cat.itacademy.blackjack.demo.active_game.domain.GameState;
@@ -35,57 +40,55 @@ class GameTest {
     @Mock
     private Card card;
 
-    private Game game;
+    private Game mockedGame;
+    private static final String NAME = "Player Name";
 
     @BeforeEach
     void setUp() {
         when(deck.getCards()).thenReturn(List.of(card));
-        game = Game.create(userPlayer, dealer, deck);
+        mockedGame = Game.create(userPlayer, dealer, deck);
     }
 
     @Nested
     class Start {
 
+        Game gameWithMockedPlayers;
+        Game gameWithoutMocks;
+
+        @BeforeEach
+        void setUp(){
+            gameWithMockedPlayers = Game.create(userPlayer, dealer, Deck.create());
+            gameWithoutMocks = Game.create(UserPlayer.create(Name.of(NAME)), Dealer.create(), Deck.create());
+        }
+
         @Test
-        void shouldShuffleAndDistributeInitialCards() {
-            when(deck.draw()).thenReturn(card);
-            when(userPlayer.checkBlackjack()).thenReturn(false);
+        void shouldDistributeInitialCards() {
+            GameWithoutBlackJackStrategy gameWithoutBlackJackStrategy = new GameWithoutBlackJackStrategy();
+            gameWithMockedPlayers.start(gameWithoutBlackJackStrategy);
 
-            game.start(shuffleStrategy);
-
-            verify(deck).shuffle(shuffleStrategy);
-            verify(deck, times(3)).draw();
-            verify(dealer).hit(card);
-            verify(userPlayer, times(2)).hit(card);
-            assertThat(game.getGameState()).isEqualTo(GameState.STARTED);
+            verify(dealer).hit(any(Card.class));
+            verify(userPlayer, times(2)).hit(any(Card.class));
+            assertThat(mockedGame.getGameState()).isEqualTo(GameState.STARTED);
         }
 
         @Test
         void shouldFinishIfPlayerHasBlackjackOnStart() {
-            when(deck.draw()).thenReturn(card);
-            when(userPlayer.checkBlackjack()).thenReturn(true);
-            when(dealer.shouldStand()).thenReturn(true);
-            when(dealer.checkBlackjack()).thenReturn(false);
+            ShuffleStrategy userWinningWithBlackjackShuffleStrategy = new UserWinningWithBlackjackShuffleStrategy();
+            gameWithoutMocks.start(userWinningWithBlackjackShuffleStrategy);
 
-            game.start(shuffleStrategy);
-
-            assertThat(game.getGameState()).isEqualTo(GameState.OVER);
-            assertThat(game.getGameOutcome().result()).isEqualTo(GameResult.USER_WIN);
-            assertThat(game.getGameOutcome().blackjack()).isTrue();
+            assertThat(gameWithoutMocks.getGameState()).isEqualTo(GameState.OVER);
+            assertThat(gameWithoutMocks.getGameOutcome().result()).isEqualTo(GameResult.USER_WIN);
+            assertThat(gameWithoutMocks.getGameOutcome().blackjack()).isTrue();
         }
 
         @Test
         void shouldFinishWithTieBlackjackOnStart() {
-            when(deck.draw()).thenReturn(card);
-            when(userPlayer.checkBlackjack()).thenReturn(true);
-            when(dealer.shouldStand()).thenReturn(true);
-            when(dealer.checkBlackjack()).thenReturn(true);
+            ShuffleStrategy tieWithBlackjackStrategy = new TieWithBlackjackShuffleStrategy();
+            gameWithoutMocks.start(tieWithBlackjackStrategy);
 
-            game.start(shuffleStrategy);
-
-            assertThat(game.getGameState()).isEqualTo(GameState.OVER);
-            assertThat(game.getGameOutcome().result()).isEqualTo(GameResult.TIE);
-            assertThat(game.getGameOutcome().blackjack()).isTrue();
+            assertThat(gameWithoutMocks.getGameState()).isEqualTo(GameState.OVER);
+            assertThat(gameWithoutMocks.getGameOutcome().result()).isEqualTo(GameResult.TIE);
+            assertThat(gameWithoutMocks.getGameOutcome().blackjack()).isTrue();
         }
 
         @Test
@@ -99,7 +102,7 @@ class GameTest {
     }
 
     @Nested
-    class playerRequestedHit {
+    class PlayerRequestedHit {
 
         @Test
         void shouldTrowInvalidHitExceptionWhenGameIsOver() {
@@ -114,10 +117,10 @@ class GameTest {
             when(deck.draw()).thenReturn(card);
             when(userPlayer.totalValueIsGreaterThan21()).thenReturn(false);
 
-            game.playerRequestedHit();
+            mockedGame.playerRequestedHit();
 
             verify(userPlayer).hit(card);
-            assertThat(game.getGameState()).isEqualTo(GameState.STARTED);
+            assertThat(mockedGame.getGameState()).isEqualTo(GameState.STARTED);
         }
 
         @Test
@@ -126,10 +129,10 @@ class GameTest {
             when(deck.draw()).thenReturn(card);
             when(userPlayer.totalValueIsGreaterThan21()).thenReturn(true);
 
-            game.playerRequestedHit();
+            mockedGame.playerRequestedHit();
 
-            assertThat(game.getGameState()).isEqualTo(GameState.OVER);
-            assertThat(game.getGameOutcome().result()).isEqualTo(GameResult.DEALER_WIN);
+            assertThat(mockedGame.getGameState()).isEqualTo(GameState.OVER);
+            assertThat(mockedGame.getGameOutcome().result()).isEqualTo(GameResult.DEALER_WIN);
         }
 
         @Test
@@ -138,10 +141,10 @@ class GameTest {
             when(userPlayer.getHandValue()).thenReturn(20);
             when(dealer.getHandValue()).thenReturn(18);
 
-            game.playerRequestedHit();
+            mockedGame.playerRequestedHit();
 
-            assertThat(game.getGameState()).isEqualTo(GameState.OVER);
-            assertThat(game.getGameOutcome().result()).isEqualTo(GameResult.USER_WIN);
+            assertThat(mockedGame.getGameState()).isEqualTo(GameState.OVER);
+            assertThat(mockedGame.getGameOutcome().result()).isEqualTo(GameResult.USER_WIN);
             verify(userPlayer, never()).hit(any());
         }
     }
@@ -162,10 +165,10 @@ class GameTest {
             when(userPlayer.getHandValue()).thenReturn(20);
             when(dealer.getHandValue()).thenReturn(18);
 
-            game.stand();
+            mockedGame.stand();
 
-            assertThat(game.getGameState()).isEqualTo(GameState.OVER);
-            assertThat(game.getGameOutcome().result()).isEqualTo(GameResult.USER_WIN);
+            assertThat(mockedGame.getGameState()).isEqualTo(GameState.OVER);
+            assertThat(mockedGame.getGameOutcome().result()).isEqualTo(GameResult.USER_WIN);
             verify(dealer, never()).hit(any());
         }
 
@@ -180,11 +183,11 @@ class GameTest {
             when(userPlayer.getHandValue()).thenReturn(20);
             when(dealer.getHandValue()).thenReturn(19);
 
-            game.stand();
+            mockedGame.stand();
 
             verify(dealer).hit(card);
-            assertThat(game.getGameState()).isEqualTo(GameState.OVER);
-            assertThat(game.getGameOutcome().result()).isEqualTo(GameResult.USER_WIN);
+            assertThat(mockedGame.getGameState()).isEqualTo(GameState.OVER);
+            assertThat(mockedGame.getGameOutcome().result()).isEqualTo(GameResult.USER_WIN);
         }
 
         @Test
@@ -198,11 +201,11 @@ class GameTest {
             when(userPlayer.getHandValue()).thenReturn(13);
             when(dealer.getHandValue()).thenReturn(19);
 
-            game.stand();
+            mockedGame.stand();
 
             verify(dealer).hit(card);
-            assertThat(game.getGameState()).isEqualTo(GameState.OVER);
-            assertThat(game.getGameOutcome().result()).isEqualTo(GameResult.DEALER_WIN);
+            assertThat(mockedGame.getGameState()).isEqualTo(GameState.OVER);
+            assertThat(mockedGame.getGameOutcome().result()).isEqualTo(GameResult.DEALER_WIN);
         }
 
         @Test
@@ -210,11 +213,11 @@ class GameTest {
             when(dealer.shouldStand()).thenReturn(true);
             when(dealer.checkBlackjack()).thenReturn(true);
 
-            game.stand();
+            mockedGame.stand();
 
-            assertThat(game.getGameOutcome().result()).isEqualTo(GameResult.DEALER_WIN);
-            assertThat(game.getGameOutcome().blackjack()).isTrue();
-            assertThat(game.getGameState()).isEqualTo(GameState.OVER);
+            assertThat(mockedGame.getGameOutcome().result()).isEqualTo(GameResult.DEALER_WIN);
+            assertThat(mockedGame.getGameOutcome().blackjack()).isTrue();
+            assertThat(mockedGame.getGameState()).isEqualTo(GameState.OVER);
         }
 
         @Test
@@ -223,11 +226,11 @@ class GameTest {
             when(dealer.checkBlackjack()).thenReturn(false);
             when(dealer.totalValueIsGreaterThan21()).thenReturn(true);
 
-            game.stand();
+            mockedGame.stand();
 
-            assertThat(game.getGameOutcome().result()).isEqualTo(GameResult.USER_WIN);
-            Assertions.assertFalse(game.getGameOutcome().blackjack());
-            assertThat(game.getGameState()).isEqualTo(GameState.OVER);
+            assertThat(mockedGame.getGameOutcome().result()).isEqualTo(GameResult.USER_WIN);
+            Assertions.assertFalse(mockedGame.getGameOutcome().blackjack());
+            assertThat(mockedGame.getGameState()).isEqualTo(GameState.OVER);
         }
     }
 }
